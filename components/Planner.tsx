@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Task } from '../types';
-import { supabase } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 interface PlannerProps {
   onNotify?: (type: 'success' | 'info' | 'alert' | 'task', title: string, msg: string) => void;
@@ -40,13 +40,35 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
 
   const fetchTasks = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .order('time', { ascending: true });
     
-    if (!error) setTasks(data || []);
-    setIsLoading(false);
+    if (!isSupabaseConfigured) {
+      const saved = localStorage.getItem('eduvault_tasks');
+      setTasks(saved ? JSON.parse(saved) : []);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('time', { ascending: true });
+      
+      if (!error) setTasks(data || []);
+    } catch (err) {
+      console.error("Supabase Task Fetch Error:", err);
+      const saved = localStorage.getItem('eduvault_tasks');
+      setTasks(saved ? JSON.parse(saved) : []);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const syncTasks = (newTasks: Task[]) => {
+    setTasks(newTasks);
+    if (!isSupabaseConfigured) {
+      localStorage.setItem('eduvault_tasks', JSON.stringify(newTasks));
+    }
   };
 
   // Real-time Engine
@@ -124,10 +146,7 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const taskData = {
-      user_id: user?.id,
+    const taskData: any = {
       title: newTask.title,
       date: selectedDate.toISOString().split('T')[0],
       time: formatTo24h(newTask.time, newTask.ampm),
@@ -136,44 +155,54 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
       priority: newTask.priority
     };
 
-    const { data, error } = await supabase.from('tasks').insert([taskData]).select();
-
-    if (!error && data) {
-      setTasks([...tasks, data[0]]);
-      onNotify?.('success', '📅 Task Set', `"${taskData.title}" added to your planner.`);
-      setNewTask({ title: '', time: '09:00', ampm: 'AM', duration: 30, priority: 'medium' });
-      setShowTaskForm(false);
+    if (isSupabaseConfigured) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        taskData.user_id = user?.id;
+        const { data, error } = await supabase.from('tasks').insert([taskData]).select();
+        if (!error && data) {
+          syncTasks([...tasks, data[0]]);
+        } else throw error;
+      } catch (err) {
+        console.error("Task add failed, using local fallback", err);
+        const localTask = { ...taskData, id: Date.now().toString() };
+        syncTasks([...tasks, localTask]);
+      }
+    } else {
+      const localTask = { ...taskData, id: Date.now().toString() };
+      syncTasks([...tasks, localTask]);
     }
+
+    onNotify?.('success', '📅 Task Set', `"${taskData.title}" added to your planner.`);
+    setNewTask({ title: '', time: '09:00', ampm: 'AM', duration: 30, priority: 'medium' });
+    setShowTaskForm(false);
   };
 
   const toggleTask = async (id: string) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
-    const { error } = await supabase
-      .from('tasks')
-      .update({ completed: !task.completed })
-      .eq('id', id);
+    const updatedTasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    syncTasks(updatedTasks);
 
-    if (!error) {
-      setTasks(prev => prev.map(t => {
-        if (t.id === id) {
-          if (!t.completed) onNotify?.('success', '✨ Progress Made', `Goal marked as finished!`);
-          return { ...t, completed: !t.completed };
-        }
-        return t;
-      }));
+    if (isSupabaseConfigured) {
+      await supabase.from('tasks').update({ completed: !task.completed }).eq('id', id);
     }
+    
+    if (!task.completed) onNotify?.('success', '✨ Progress Made', `Goal marked as finished!`);
   };
 
   const deleteTask = async (id: string) => {
     if (confirm("Permanently delete this study goal?")) {
-      const { error } = await supabase.from('tasks').delete().eq('id', id);
-      if (!error) {
-        if (activeTaskId === id) setActiveTaskId(null);
-        setTasks(tasks.filter(t => t.id !== id));
-        onNotify?.('info', '🗑️ Goal Removed', 'Task has been deleted.');
+      const updatedTasks = tasks.filter(t => t.id !== id);
+      syncTasks(updatedTasks);
+
+      if (isSupabaseConfigured) {
+        await supabase.from('tasks').delete().eq('id', id);
       }
+
+      if (activeTaskId === id) setActiveTaskId(null);
+      onNotify?.('info', '🗑️ Goal Removed', 'Task has been deleted.');
     }
   };
 

@@ -1,17 +1,34 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 
-const getAIClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getEnv = (key: string): string => {
+  try {
+    return (window as any).process?.env?.[key] || (process?.env?.[key]) || '';
+  } catch {
+    return '';
+  }
+};
+
+const getAIClient = () => {
+  const apiKey = getEnv('API_KEY');
+  if (!apiKey) {
+    console.warn("Gemini API Key missing. AI features will be unavailable.");
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 // Internal map to persist chat sessions for different documents
 const chatSessions = new Map<string, Chat>();
 
-export const getOrCreateChatSession = (docId: string, docContent: string): Chat => {
+export const getOrCreateChatSession = (docId: string, docContent: string): Chat | null => {
   if (chatSessions.has(docId)) {
     return chatSessions.get(docId)!;
   }
 
   const ai = getAIClient();
+  if (!ai) return null;
+
   const chat = ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
@@ -40,6 +57,10 @@ export const clearChatSession = (docId: string) => {
 
 export async function* streamChat(docId: string, message: string, docContent: string) {
   const chat = getOrCreateChatSession(docId, docContent);
+  if (!chat) {
+    yield "Error: AI API Key not configured. Please add your API_KEY to the environment variables.";
+    return;
+  }
   
   try {
     const result = await chat.sendMessageStream({ message });
@@ -55,6 +76,8 @@ export async function* streamChat(docId: string, message: string, docContent: st
 
 export const generateQuiz = async (content: string) => {
   const ai = getAIClient();
+  if (!ai) return "AI Configuration missing.";
+
   const prompt = `
     Based on the following study material, generate a 5-question quiz to test a student's understanding.
     Include a mix of Multiple Choice and Short Answer.
@@ -81,6 +104,8 @@ export const generateQuiz = async (content: string) => {
 
 export const createStudyRoadmap = async (content: string) => {
   const ai = getAIClient();
+  if (!ai) return "AI Configuration missing.";
+
   const prompt = `
     Analyze this document and create a structured Study Roadmap.
     Break it down into:
@@ -110,6 +135,8 @@ export const createStudyRoadmap = async (content: string) => {
 
 export const explainConcept = async (concept: string, documentContext?: string) => {
   const ai = getAIClient();
+  if (!ai) return "AI Configuration missing.";
+
   const model = "gemini-3-flash-preview";
 
   const prompt = documentContext 
@@ -131,9 +158,10 @@ export const explainConcept = async (concept: string, documentContext?: string) 
   }
 };
 
-// Fixed missing export: Added chatWithAI to handle general academic queries in the mobile assistant
 export const chatWithAI = async (query: string) => {
   const ai = getAIClient();
+  if (!ai) return "AI Configuration missing.";
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

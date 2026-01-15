@@ -1,14 +1,25 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder-project.supabase.co';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'placeholder-anon-key';
+const getEnv = (key: string): string => {
+  try {
+    // Check multiple possible locations for environment variables
+    const val = (window as any).process?.env?.[key] || (process?.env?.[key]) || '';
+    return val;
+  } catch {
+    return '';
+  }
+};
+
+const supabaseUrl = getEnv('SUPABASE_URL') || 'https://placeholder-project.supabase.co';
+const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY') || 'placeholder-anon-key';
 
 // Helper to determine if we have real credentials
 export const isSupabaseConfigured = 
-  process.env.SUPABASE_URL && 
-  process.env.SUPABASE_ANON_KEY && 
-  !process.env.SUPABASE_URL.includes('placeholder');
+  !!getEnv('SUPABASE_URL') && 
+  !!getEnv('SUPABASE_ANON_KEY') && 
+  !getEnv('SUPABASE_URL').includes('placeholder') &&
+  getEnv('SUPABASE_URL') !== '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
