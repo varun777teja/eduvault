@@ -4,12 +4,12 @@ import {
   Sparkles, Send, BrainCircuit, Briefcase, 
   Globe, Cpu, BookOpen, GraduationCap, 
   ChevronRight, ArrowUpRight, Clock,
-  TrendingUp, Newspaper
+  TrendingUp, Newspaper, Cloud, CloudOff
 } from 'lucide-react';
 import { chatWithAI } from '../services/geminiService';
+import { isSupabaseConfigured } from '../services/supabase';
 
 const Dashboard: React.FC = () => {
-  // Quick Ask State
   const [quickQuery, setQuickQuery] = useState('');
   const [quickResult, setQuickResult] = useState<string | null>(null);
   const [isQuickLoading, setIsQuickLoading] = useState(false);
@@ -47,13 +47,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700 pb-20">
-      {/* Centralized AI Discovery Banner */}
       <div className="relative overflow-hidden bg-slate-900 rounded-[3.5rem] p-8 lg:p-16 text-white shadow-2xl border border-white/5">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-6 gap-3">
             <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10">
               <Sparkles className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
               <span>EduVault Discovery Hub</span>
+            </div>
+            <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border ${isSupabaseConfigured ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
+              {isSupabaseConfigured ? <Cloud className="w-3 h-3" /> : <CloudOff className="w-3 h-3" />}
+              <span>{isSupabaseConfigured ? 'Cloud Sync Active' : 'Local Storage Mode'}</span>
             </div>
           </div>
           
@@ -61,7 +64,6 @@ const Dashboard: React.FC = () => {
             Discover your next <span className="text-indigo-400">opportunity</span>.
           </h1>
 
-          {/* AI Command Center */}
           <form onSubmit={handleQuickAsk} className="relative group/ask max-w-xl mx-auto">
             <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-3xl opacity-0 group-focus-within/ask:opacity-100 transition-all"></div>
             <div className="relative flex items-center">
@@ -93,16 +95,11 @@ const Dashboard: React.FC = () => {
              </div>
           )}
         </div>
-        
-        {/* Abstract Background Orbs */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-600/20 rounded-full blur-[140px] translate-x-1/2 translate-y-1/2"></div>
       </div>
 
-      {/* Discovery Feed Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Jobs & Internships (Left Column) */}
         <div className="lg:col-span-8 space-y-8">
           <section>
             <div className="flex items-center justify-between mb-6 px-2">
@@ -135,7 +132,6 @@ const Dashboard: React.FC = () => {
             </div>
           </section>
 
-          {/* New Books Section */}
           <section>
             <div className="flex items-center justify-between mb-6 px-2">
               <div>
@@ -161,7 +157,6 @@ const Dashboard: React.FC = () => {
           </section>
         </div>
 
-        {/* AI & Academic News (Right Column) */}
         <div className="lg:col-span-4 space-y-8">
           <section className="bg-white border border-slate-200 rounded-[3rem] p-8 h-full shadow-sm">
             <div className="flex items-center gap-3 mb-8">
@@ -203,7 +198,6 @@ const Dashboard: React.FC = () => {
             </div>
           </section>
         </div>
-
       </div>
     </div>
   );

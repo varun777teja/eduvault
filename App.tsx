@@ -1,22 +1,22 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import Reader from './components/Reader';
-import Notifications from './components/Notifications';
-import Stats from './components/Stats';
-import Planner from './components/Planner';
-import MobileBottomNav from './components/MobileBottomNav';
-import SearchView from './components/SearchView';
-import LibraryView from './components/LibraryView';
-import ProfileView from './components/ProfileView';
-import LoginView from './components/LoginView';
-import NotificationSystem from './components/NotificationSystem';
-import { Document, AppNotification } from './types';
-import { soundService } from './services/soundService';
-import { supabase, isSupabaseConfigured } from './services/supabase';
+import Navbar from './components/Navbar.tsx';
+import Sidebar from './components/Sidebar.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import Reader from './components/Reader.tsx';
+import Notifications from './components/Notifications.tsx';
+import Stats from './components/Stats.tsx';
+import Planner from './components/Planner.tsx';
+import MobileBottomNav from './components/MobileBottomNav.tsx';
+import SearchView from './components/SearchView.tsx';
+import LibraryViewComponent from './components/LibraryView.tsx';
+import ProfileView from './components/ProfileView.tsx';
+import LoginView from './components/LoginView.tsx';
+import NotificationSystem from './components/NotificationSystem.tsx';
+import { Document, AppNotification } from './types.ts';
+import { soundService } from './services/soundService.ts';
+import { supabase, isSupabaseConfigured } from './services/supabase.ts';
 
 const INITIAL_DOCS: Document[] = [
   {
@@ -51,7 +51,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const initSession = async () => {
       if (!isSupabaseConfigured) {
-        // Fallback to local storage session if Supabase isn't configured
         const localAuth = localStorage.getItem('eduvault_local_auth');
         if (localAuth === 'true') {
           setSession({ user: { id: 'local-user', email: 'guest@eduvault.local' } });
@@ -61,12 +60,13 @@ const App: React.FC = () => {
       }
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Explicitly refresh session on mount to catch OAuth redirects
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
         setSession(session);
       } catch (error) {
         console.error('Failed to initialize Supabase session:', error);
-        setIsLocalMode(true);
-        setSession(null);
+        // Don't force local mode yet, auth state listener might catch it
       } finally {
         setIsAuthLoading(false);
       }
@@ -77,6 +77,9 @@ const App: React.FC = () => {
     if (isSupabaseConfigured) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session);
+        if (session) {
+          setIsLocalMode(false);
+        }
       });
       return () => subscription.unsubscribe();
     }
@@ -105,7 +108,7 @@ const App: React.FC = () => {
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      setIsLocalMode(true); // Switch to local mode if fetch fails
+      // If we can't fetch, we might still have a session but RLS/DB is broken
     }
   };
 
@@ -211,7 +214,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
-              <Route path="/library" element={<LibraryView documents={documents} onRemove={removeDocument} />} />
+              <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={removeDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/stats" element={<Stats documents={documents} />} />
