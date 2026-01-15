@@ -1,49 +1,46 @@
 
-import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
-
-const getEnv = (key: string): string => {
-  try {
-    return (window as any).process?.env?.[key] || (process?.env?.[key]) || '';
-  } catch {
-    return '';
-  }
-};
+import { GoogleGenAI, Chat, GenerateContentResponse, Type } from "@google/genai";
 
 const getAIClient = () => {
-  const apiKey = getEnv('API_KEY');
-  if (!apiKey) {
-    console.warn("Gemini API Key missing. AI features will be unavailable.");
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
-// Internal map to persist chat sessions for different documents
 const chatSessions = new Map<string, Chat>();
 
-export const getOrCreateChatSession = (docId: string, docContent: string): Chat | null => {
+/**
+ * Extracts grounding sources from a response
+ */
+export const getSources = (response: any) => {
+  return response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
+    title: chunk.web?.title || "Reference Source",
+    uri: chunk.web?.uri
+  })).filter((s: any) => s.uri) || [];
+};
+
+// Fix for Reader.tsx: Added missing export clearChatSession
+export const clearChatSession = (docId: string) => {
+  chatSessions.delete(docId);
+};
+
+export const getOrCreateChatSession = (docId: string, docContent: string): Chat => {
   if (chatSessions.has(docId)) {
     return chatSessions.get(docId)!;
   }
 
   const ai = getAIClient();
-  if (!ai) return null;
-
   const chat = ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
       systemInstruction: `
-        You are the EduVault Academic Assistant. You are a world-class Socratic tutor.
-        CONTEXT: You are helping a student read a document. Here is a snippet of the content:
-        "${docContent.substring(0, 3000)}"
+        You are the EduVault Academic Assistant. 
+        CONTEXT: You are helping a student with the following document: "${docContent.substring(0, 4000)}"
         
-        RULES:
-        1. Be encouraging, precise, and academic.
-        2. Use Markdown (bold, lists, tables) for clarity.
-        3. Do not just provide answers; explain the reasoning.
-        4. If the student asks something unrelated to the document, politely guide them back to their studies but answer briefly if it helps their general knowledge.
-        5. Use analogies to explain complex topics.
+        GOALS:
+        1. Help the student understand complex concepts.
+        2. Use Google Search grounding for facts, citations, or recent academic developments.
+        3. Always provide clear, structured explanations.
       `,
+      tools: [{ googleSearch: {} }]
     }
   });
 
@@ -51,129 +48,136 @@ export const getOrCreateChatSession = (docId: string, docContent: string): Chat 
   return chat;
 };
 
-export const clearChatSession = (docId: string) => {
-  chatSessions.delete(docId);
+/**
+ * Enhanced OCR: Converts an image to structured study text
+ */
+export const scanDocumentImage = async (base64Image: string) => {
+  const ai = getAIClient();
+  const imagePart = {
+    inlineData: {
+      mimeType: 'image/jpeg',
+      data: base64Image,
+    },
+  };
+  
+  const prompt = `
+    Analyze this image of a student's notes or textbook.
+    1. Extract all text accurately.
+    2. Format it into clean Markdown.
+    3. Suggest a clear title and a logical academic category (e.g., Biology, Calculus).
+    4. Provide a brief summary of the content.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: { parts: [imagePart, { text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            category: { type: Type.STRING },
+            content: { type: Type.STRING },
+            summary: { type: Type.STRING }
+          },
+          required: ["title", "category", "content"]
+        }
+      }
+    });
+    
+    return JSON.parse(response.text || "{}");
+  } catch (error) {
+    console.error("OCR Error:", error);
+    throw error;
+  }
 };
 
 export async function* streamChat(docId: string, message: string, docContent: string) {
   const chat = getOrCreateChatSession(docId, docContent);
-  if (!chat) {
-    yield "Error: AI API Key not configured. Please add your API_KEY to the environment variables.";
-    return;
-  }
-  
   try {
     const result = await chat.sendMessageStream({ message });
     for await (const chunk of result) {
       const c = chunk as GenerateContentResponse;
-      yield c.text || "";
+      yield {
+        text: c.text || "",
+        sources: getSources(c)
+      };
     }
   } catch (error) {
-    console.error("Streaming Chat Error:", error);
-    yield "Error: I encountered a problem connecting to the AI. Please try again.";
+    yield { text: "Error: AI Tutor is currently unavailable.", sources: [] };
   }
 }
 
-export const generateQuiz = async (content: string) => {
-  const ai = getAIClient();
-  if (!ai) return "AI Configuration missing.";
-
-  const prompt = `
-    Based on the following study material, generate a 5-question quiz to test a student's understanding.
-    Include a mix of Multiple Choice and Short Answer.
-    Provide the correct answers at the very end in a 'Key' section.
-    
-    CONTENT:
-    ${content.substring(0, 5000)}
-  `;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        systemInstruction: "You are an expert examiner. Create challenging but fair questions that focus on core concepts, not trivial details.",
-        temperature: 0.5,
-      }
-    });
-    return response.text;
-  } catch (error) {
-    return "Failed to generate quiz.";
-  }
-};
-
-export const createStudyRoadmap = async (content: string) => {
-  const ai = getAIClient();
-  if (!ai) return "AI Configuration missing.";
-
-  const prompt = `
-    Analyze this document and create a structured Study Roadmap.
-    Break it down into:
-    1. Prerequisites (What to know before reading).
-    2. Core Learning Objectives (3-5 main points).
-    3. Step-by-step study guide.
-    4. Estimated time to mastery.
-    
-    CONTENT:
-    ${content.substring(0, 5000)}
-  `;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        systemInstruction: "You are a Study Architect. Organize information logically from simple to complex.",
-        temperature: 0.3,
-      }
-    });
-    return response.text;
-  } catch (error) {
-    return "Failed to create roadmap.";
-  }
-};
-
 export const explainConcept = async (concept: string, documentContext?: string) => {
   const ai = getAIClient();
-  if (!ai) return "AI Configuration missing.";
-
-  const model = "gemini-3-flash-preview";
-
   const prompt = documentContext 
-    ? `Context from the student's document: "${documentContext}"\n\nQuestion or Concept to explain: "${concept}"`
-    : `Explain this concept clearly for a student: "${concept}"`;
+    ? `Context: "${documentContext}"\nExplain: "${concept}"`
+    : `Explain this academic concept clearly: "${concept}"`;
 
   try {
     const response = await ai.models.generateContent({
-      model: model,
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
-        systemInstruction: "You are an expert academic tutor. Use Markdown. Be encouraging and concise.",
-        temperature: 0.7,
+        tools: [{ googleSearch: {} }],
+        systemInstruction: "You are an expert tutor. Provide accurate info with sources if needed.",
       },
     });
-    return response.text || "I couldn't generate an explanation.";
+    return {
+      text: response.text || "I couldn't explain that.",
+      sources: getSources(response)
+    };
   } catch (error) {
-    return "Error connecting to AI tutor.";
+    return { text: "Network error.", sources: [] };
   }
 };
 
 export const chatWithAI = async (query: string) => {
   const ai = getAIClient();
-  if (!ai) return "AI Configuration missing.";
-
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: query,
       config: {
-        systemInstruction: "You are the EduVault Academic Assistant. Provide helpful, concise academic advice and answer student questions clearly based on general knowledge or common study practices.",
-        temperature: 0.7,
+        tools: [{ googleSearch: {} }],
+        systemInstruction: "You are EduVault AI. Help students find academic info and careers.",
       },
     });
-    return response.text || "I couldn't generate a response.";
+    return {
+      text: response.text || "",
+      sources: getSources(response)
+    };
   } catch (error) {
-    console.error("General AI Chat Error:", error);
-    return "Failed to get a response from the assistant.";
+    return { text: "Failed to get AI response.", sources: [] };
+  }
+};
+
+// Fix for Reader.tsx: Added missing export generateQuiz
+export const generateQuiz = async (docContent: string) => {
+  const ai = getAIClient();
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Generate a challenging 5-question multiple choice quiz with answers and explanations based on this content: "${docContent.substring(0, 4000)}"`,
+    });
+    return response.text || "Failed to generate quiz.";
+  } catch (error) {
+    return "Error generating quiz.";
+  }
+};
+
+// Fix for Reader.tsx: Added missing export createStudyRoadmap
+export const createStudyRoadmap = async (docContent: string) => {
+  const ai = getAIClient();
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Create a logical study roadmap to master the concepts in this document: "${docContent.substring(0, 4000)}"`,
+    });
+    return response.text || "Failed to create roadmap.";
+  } catch (error) {
+    return "Error creating roadmap.";
   }
 };

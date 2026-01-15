@@ -3,20 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 
 const getEnv = (key: string): string => {
   try {
-    // Check window.process (polyfilled in index.html) or direct process.env
     return (window as any).process?.env?.[key] || (process?.env?.[key]) || '';
   } catch {
     return '';
   }
 };
 
-// Your specific Supabase Project URL
 const supabaseUrl = 'https://pnqsiejxuwfgbzyeglhd.supabase.co';
-
-// Your provided Public (Anon) Key
 const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY') || 'sb_publishable_KZbgCq0pW84Jov0XRUTt6A_yAABNhBh';
 
-// Check if we have a real configuration
 export const isSupabaseConfigured = 
   !!supabaseAnonKey && 
   supabaseAnonKey !== 'placeholder-anon-key' &&
@@ -39,17 +34,19 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  *    created_at TIMESTAMPTZ DEFAULT NOW()
  * );
  * 
- * --- GOOGLE AUTH: FIXING ERROR 400 REDIRECT_URI_MISMATCH ---
+ * -- Note: Roll Number and Branch are currently stored in auth.users user_metadata.
+ * -- For a more robust solution, you can create a profiles table:
  * 
- * 1. GOOGLE CLOUD CONSOLE (https://console.cloud.google.com/):
- *    - Go to APIs & Services -> Credentials.
- *    - Edit your "OAuth 2.0 Client ID".
- *    - Add to "Authorized redirect URIs":
- *      https://pnqsiejxuwfgbzyeglhd.supabase.co/auth/v1/callback
+ * CREATE TABLE public.profiles (
+ *    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+ *    full_name TEXT,
+ *    roll_number TEXT UNIQUE,
+ *    branch TEXT,
+ *    updated_at TIMESTAMPTZ DEFAULT NOW()
+ * );
  * 
- * 2. SUPABASE DASHBOARD (https://supabase.com/dashboard):
- *    - Go to Authentication -> URL Configuration.
- *    - Ensure your App URL (e.g., http://localhost:5173) is in "Redirect URLs".
- *    - Go to Authentication -> Providers -> Google.
- *    - Ensure Client ID and Secret are correct.
+ * -- Enable RLS
+ * ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ * CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+ * CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
  */

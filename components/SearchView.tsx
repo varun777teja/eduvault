@@ -53,7 +53,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
       setIsAiLoading(true);
       try {
         const res = await chatWithAI(`Provide a very concise (max 2 sentences) overview or definition for: ${searchTerm}`);
-        setAiInsight(res);
+        // Fix: Assign res.text to string state
+        setAiInsight(res.text);
       } catch (err) {
         setAiInsight(null);
       } finally {
@@ -112,7 +113,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: response,
+        // Fix: Use response.text string instead of the whole result object
+        text: response.text,
         timestamp: new Date()
       };
       setChatMessages(prev => [...prev, aiMsg]);

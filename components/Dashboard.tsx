@@ -21,7 +21,8 @@ const Dashboard: React.FC = () => {
     setQuickResult(null);
     try {
       const res = await chatWithAI(quickQuery);
-      setQuickResult(res);
+      // Fix: Assign res.text string to state
+      setQuickResult(res.text);
     } catch (err) {
       setQuickResult("Error connecting to tutor.");
     } finally {

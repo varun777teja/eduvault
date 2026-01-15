@@ -20,7 +20,8 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
     setAiResponse(null);
     try {
       const result = await chatWithAI(aiQuery);
-      setAiResponse(result || "I couldn't find an answer for that.");
+      // Fix: Assign result.text string to state
+      setAiResponse(result.text || "I couldn't find an answer for that.");
     } catch (err) {
       setAiResponse("Sorry, there was an error processing your request.");
     } finally {
