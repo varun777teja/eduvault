@@ -115,6 +115,14 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
                 </div>
               )) : (
                 <div className="w-full py-16 text-center bg-white border border-dashed border-slate-200 rounded-[3rem]">
+                   <img 
+                    src="https://i.ibb.co/zhbHCxnh/logo.png" 
+                    className="w-12 h-12 opacity-20 mx-auto mb-4 grayscale" 
+                    alt="Empty Vault"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                   />
                    <BookOpen className="w-8 h-8 text-slate-200 mx-auto mb-4" />
                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No Documents Synced</p>
                 </div>

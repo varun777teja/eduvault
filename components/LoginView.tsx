@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, Loader2, UserCheck, 
@@ -213,7 +214,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         <div className="mb-16 animate-in fade-in slide-in-from-top-10 duration-1000">
           <div className="w-28 h-28 bg-white rounded-[3rem] flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] mb-10 mx-auto group cursor-pointer hover:rotate-12 transition-transform overflow-hidden ring-4 ring-indigo-500/20 p-2">
              <img 
-               src="logo.png" 
+               src="https://i.ibb.co/zhbHCxnh/logo.png" 
                alt="EduVault Logo" 
                className="w-full h-full object-contain"
                onError={(e) => {

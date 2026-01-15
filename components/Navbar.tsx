@@ -37,9 +37,12 @@ const Navbar: React.FC<NavbarProps> = ({ searchTerm, onSearchChange, syncStatus 
         <Link to="/" className="flex items-center gap-3 shrink-0 group">
           <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white border border-slate-100 shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-105">
              <img 
-               src="https://cdn-icons-png.flaticon.com/512/3413/3413535.png" 
+               src="https://i.ibb.co/zhbHCxnh/logo.png" 
                alt="EduVault Logo" 
                className="w-full h-full object-contain p-1.5" 
+               onError={(e) => {
+                 e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/3413/3413535.png";
+               }}
              />
           </div>
           <div className="flex flex-col">
