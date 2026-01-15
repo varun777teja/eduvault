@@ -6,15 +6,16 @@ import {
   Flame, BookOpen, BrainCircuit, Target,
   Sparkles, Camera, MapPin, GraduationCap,
   ChevronRight, BadgeCheck, Trophy, Star,
-  Zap, Clock
+  Zap, Clock, LogOut
 } from 'lucide-react';
 import { Document } from '../types';
 
 interface ProfileViewProps {
   documents: Document[];
+  onLogout?: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ documents }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ documents, onLogout }) => {
   const [stats, setStats] = useState({ minutes: 0, ai_hits: 0 });
   const [level, setLevel] = useState(4);
   const [xp, setXp] = useState(720);
@@ -32,6 +33,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ documents }) => {
     /* Fixed missing Zap icon reference */
     { title: "Quick Learner", icon: Zap, desc: "Completed 5 practice quizzes", color: "text-emerald-500", bg: "bg-emerald-50", unlocked: true },
   ];
+
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to lock the vault?")) {
+      onLogout?.();
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-4 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32">
@@ -83,9 +90,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ documents }) => {
                <Settings className="w-5 h-5" />
                <span className="hidden lg:block text-xs font-black uppercase tracking-widest">Settings</span>
             </button>
-            <button className="p-4 bg-white border border-slate-200 text-slate-500 rounded-3xl shadow-sm hover:border-indigo-200 hover:text-indigo-600 transition-all active:scale-95 flex items-center justify-center gap-3">
-               <Award className="w-5 h-5" />
-               <span className="hidden lg:block text-xs font-black uppercase tracking-widest">Badges</span>
+            <button 
+              onClick={handleLogout}
+              className="p-4 bg-rose-50 text-rose-600 border border-rose-100 rounded-3xl shadow-sm hover:bg-rose-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+            >
+               <LogOut className="w-5 h-5" />
+               <span className="hidden lg:block text-xs font-black uppercase tracking-widest">Sign Out</span>
             </button>
           </div>
         </div>
@@ -106,7 +116,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ documents }) => {
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Study Minutes</p>
                 </div>
                 <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
-                  {/* Fixed missing Clock icon reference */}
                   <Clock className="w-6 h-6 text-indigo-400" />
                 </div>
               </div>

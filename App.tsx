@@ -12,42 +12,76 @@ import MobileBottomNav from './components/MobileBottomNav';
 import SearchView from './components/SearchView';
 import LibraryView from './components/LibraryView';
 import ProfileView from './components/ProfileView';
+import LoginView from './components/LoginView';
 import NotificationSystem from './components/NotificationSystem';
 import { Document, AppNotification } from './types';
 import { soundService } from './services/soundService';
-
-const INITIAL_DOCS: Document[] = [
-  {
-    id: '1',
-    title: 'Introduction to Quantum Physics',
-    author: 'Richard Feynman',
-    category: 'Science',
-    uploadDate: '2024-03-15',
-    content: 'Quantum mechanics is a fundamental theory in physics...',
-    coverUrl: 'https://picsum.photos/seed/physics/300/400'
-  },
-  {
-    id: '2',
-    title: 'The Great Gatsby - Chapter 1 Notes',
-    author: 'F. Scott Fitzgerald',
-    category: 'Literature',
-    uploadDate: '2024-03-10',
-    content: 'In my younger and more vulnerable years...',
-    coverUrl: 'https://picsum.photos/seed/gatsby/300/400'
-  }
-];
+import { supabase } from './services/supabase';
 
 const App: React.FC = () => {
-  const [documents, setDocuments] = useState<Document[]>(() => {
-    const saved = localStorage.getItem('eduvault_docs');
-    return saved ? JSON.parse(saved) : INITIAL_DOCS;
-  });
+  const [session, setSession] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
+  // Check auth session
   useEffect(() => {
-    localStorage.setItem('eduvault_docs', JSON.stringify(documents));
-  }, [documents]);
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (error) {
+        console.error('Failed to initialize Supabase session:', error);
+        // We stay in a "logged out" state if the session check fails (e.g., misconfigured URL)
+        setSession(null);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch documents from Supabase when session changes
+  useEffect(() => {
+    if (session) {
+      fetchDocuments();
+    }
+  }, [session]);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      // Only show notification if we are actually trying to reach a real Supabase instance
+      if (!process.env.SUPABASE_URL?.includes('placeholder')) {
+        addNotification('alert', 'Connection Error', 'Could not fetch your documents from the vault.');
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+      setSession(null); // Force clear session state anyway
+    }
+  };
 
   const addNotification = useCallback((type: AppNotification['type'], title: string, message: string) => {
     const id = Date.now().toString();
@@ -57,7 +91,6 @@ const App: React.FC = () => {
     if (type === 'success' || type === 'task') soundService.playSuccess();
     else soundService.playAlert();
 
-    // Auto remove after 5s
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 5000);
@@ -67,7 +100,44 @@ const App: React.FC = () => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const removeDocument = (id: string) => setDocuments(prev => prev.filter(d => d.id !== id));
+  const removeDocument = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+
+      setDocuments(prev => prev.filter(d => d.id !== id));
+      addNotification('success', 'Document Removed', 'The item was deleted from your vault.');
+    } catch (error) {
+      console.error('Error removing document:', error);
+      addNotification('alert', 'Error', 'Failed to remove the document.');
+    }
+  };
+
+  if (isAuthLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Unlocking Vault...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <HashRouter>
+        <Routes>
+          <Route path="/login" element={<LoginView onLogin={() => {}} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </HashRouter>
+    );
+  }
 
   return (
     <HashRouter>
@@ -85,7 +155,7 @@ const App: React.FC = () => {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/stats" element={<Stats documents={documents} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} />} />
-              <Route path="/profile" element={<ProfileView documents={documents} />} />
+              <Route path="/profile" element={<ProfileView documents={documents} onLogout={handleLogout} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

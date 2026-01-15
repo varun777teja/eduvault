@@ -4,10 +4,11 @@ import {
   Calendar as CalendarIcon, Clock, Plus, Trash2, 
   ChevronLeft, ChevronRight, Sparkles, X, Timer, Play, 
   BellRing, Check, BookOpen, PartyPopper, Trophy,
-  Hourglass, Rocket, ArrowLeft
+  Hourglass, Rocket, ArrowLeft, Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Task } from '../types';
+import { supabase } from '../services/supabase';
 
 interface PlannerProps {
   onNotify?: (type: 'success' | 'info' | 'alert' | 'task', title: string, msg: string) => void;
@@ -15,10 +16,8 @@ interface PlannerProps {
 
 const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('eduvault_tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -36,8 +35,19 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('eduvault_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('time', { ascending: true });
+    
+    if (!error) setTasks(data || []);
+    setIsLoading(false);
+  };
 
   // Real-time Engine
   useEffect(() => {
@@ -110,12 +120,14 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
     return `${hours}:${m} ${ampm}`;
   };
 
-  const addTask = (e: React.FormEvent) => {
+  const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
 
-    const task: Task = {
-      id: Date.now().toString(),
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const taskData = {
+      user_id: user?.id,
       title: newTask.title,
       date: selectedDate.toISOString().split('T')[0],
       time: formatTo24h(newTask.time, newTask.ampm),
@@ -124,27 +136,44 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
       priority: newTask.priority
     };
 
-    setTasks([...tasks, task]);
-    onNotify?.('success', '📅 Task Set', `"${task.title}" added to your planner.`);
-    setNewTask({ title: '', time: '09:00', ampm: 'AM', duration: 30, priority: 'medium' });
-    setShowTaskForm(false);
+    const { data, error } = await supabase.from('tasks').insert([taskData]).select();
+
+    if (!error && data) {
+      setTasks([...tasks, data[0]]);
+      onNotify?.('success', '📅 Task Set', `"${taskData.title}" added to your planner.`);
+      setNewTask({ title: '', time: '09:00', ampm: 'AM', duration: 30, priority: 'medium' });
+      setShowTaskForm(false);
+    }
   };
 
-  const toggleTask = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        if (!t.completed) onNotify?.('success', '✨ Progress Made', `Goal marked as finished!`);
-        return { ...t, completed: !t.completed };
-      }
-      return t;
-    }));
+  const toggleTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const { error } = await supabase
+      .from('tasks')
+      .update({ completed: !task.completed })
+      .eq('id', id);
+
+    if (!error) {
+      setTasks(prev => prev.map(t => {
+        if (t.id === id) {
+          if (!t.completed) onNotify?.('success', '✨ Progress Made', `Goal marked as finished!`);
+          return { ...t, completed: !t.completed };
+        }
+        return t;
+      }));
+    }
   };
 
-  const deleteTask = (id: string) => {
+  const deleteTask = async (id: string) => {
     if (confirm("Permanently delete this study goal?")) {
-      if (activeTaskId === id) setActiveTaskId(null);
-      setTasks(tasks.filter(t => t.id !== id));
-      onNotify?.('info', '🗑️ Goal Removed', 'Task has been deleted.');
+      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (!error) {
+        if (activeTaskId === id) setActiveTaskId(null);
+        setTasks(tasks.filter(t => t.id !== id));
+        onNotify?.('info', '🗑️ Goal Removed', 'Task has been deleted.');
+      }
     }
   };
 
@@ -225,6 +254,11 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-7 space-y-8">
           <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+            {isLoading ? (
+               <div className="absolute inset-0 z-20 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+                  <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+               </div>
+            ) : null}
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-2xl font-black text-slate-800 tracking-tight">
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
@@ -271,8 +305,6 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
                 );
               })}
             </div>
-            
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/20 rounded-full blur-[120px] -mr-32 -mt-32"></div>
           </div>
         </div>
 
@@ -321,9 +353,6 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
                         <p className={`text-[15px] font-black truncate transition-all duration-500 ${task.completed ? 'line-through text-slate-500' : 'text-white'}`}>
                           {task.title}
                         </p>
-                        {task.id === nextTaskIn?.id && (
-                          <span className="text-[8px] font-black uppercase px-2 py-0.5 bg-indigo-600 text-white rounded-full animate-pulse">Up Next</span>
-                        )}
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -350,8 +379,6 @@ const Planner: React.FC<PlannerProps> = ({ onNotify }) => {
                 )}
               </div>
             </div>
-            
-            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-[120px] -mr-40 -mt-40"></div>
           </div>
         </div>
       </div>
