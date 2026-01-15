@@ -1,14 +1,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-/**
- * Supabase client initialization.
- * 
- * Note: These environment variables must be provided in your deployment settings.
- * We use placeholders to prevent the application from crashing on startup if they are missing.
- */
 const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder-project.supabase.co';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'placeholder-anon-key';
+
+// Helper to determine if we have real credentials
+export const isSupabaseConfigured = 
+  process.env.SUPABASE_URL && 
+  process.env.SUPABASE_ANON_KEY && 
+  !process.env.SUPABASE_URL.includes('placeholder');
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -34,12 +34,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  *    - duration: integer
  *    - completed: boolean
  *    - priority: text
- * 
- * 3. Table: profiles
- *    - id: uuid (primary key, references auth.users)
- *    - full_name: text
- *    - xp: integer
- *    - level: integer
- *    - minutes_studied: integer
- *    - ai_hits: integer
  */

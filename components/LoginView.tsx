@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { 
   ShieldCheck, ArrowRight, Sparkles, 
   BrainCircuit, Globe, Lock, Mail,
-  Github, Chrome, Loader2, AlertCircle
+  Github, Chrome, Loader2, AlertCircle, UserCheck
 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 interface LoginViewProps {
   onLogin: () => void;
 }
 
-const LoginView: React.FC<LoginViewProps> = () => {
+const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +22,15 @@ const LoginView: React.FC<LoginViewProps> = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // If Supabase isn't configured, use local login
+    if (!isSupabaseConfigured) {
+      setTimeout(() => {
+        setIsLoading(false);
+        onLogin();
+      }, 800);
+      return;
+    }
 
     try {
       if (mode === 'signin') {
@@ -41,10 +50,18 @@ const LoginView: React.FC<LoginViewProps> = () => {
         alert("Verification email sent! Check your inbox.");
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed.');
+      setError(err.message || 'Authentication failed. Check your network.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGuestAccess = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      onLogin();
+    }, 500);
   };
 
   return (
@@ -78,16 +95,29 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
               </h2>
               <p className="text-slate-400 text-sm mt-1">
-                {mode === 'signin' ? 'Access your personal library vault.' : 'Start your academic journey today.'}
+                {!isSupabaseConfigured ? 'Entering Local Access Mode' : 'Access your personal library vault.'}
               </p>
             </div>
-            <button 
-              onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-              className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
-            >
-              {mode === 'signin' ? 'Join Now' : 'Sign In'}
-            </button>
+            {isSupabaseConfigured && (
+              <button 
+                onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+                className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
+              >
+                {mode === 'signin' ? 'Join Now' : 'Sign In'}
+              </button>
+            )}
           </div>
+
+          {!isSupabaseConfigured && (
+            <div className="mb-8 p-6 bg-amber-500/10 border border-amber-500/20 rounded-3xl">
+              <div className="flex items-center gap-3 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <AlertCircle className="w-4 h-4" /> Cloud Config Missing
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Supabase keys weren't found. You can still use EduVault in <b>Local Mode</b>. Your data will be saved locally to this browser.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-400 text-xs font-medium animate-in slide-in-from-top-2">
@@ -123,20 +153,32 @@ const LoginView: React.FC<LoginViewProps> = () => {
               </div>
             </div>
 
-            <button 
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
-            >
-              {isLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : (
-                <>
-                  {mode === 'signin' ? 'Enter the Vault' : 'Initialize Account'}
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                </>
+            <div className="flex flex-col gap-4">
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <>
+                    {!isSupabaseConfigured ? 'Start Local Session' : (mode === 'signin' ? 'Enter the Vault' : 'Initialize Account')}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
+              </button>
+
+              {error && (
+                <button 
+                  type="button"
+                  onClick={handleGuestAccess}
+                  className="w-full py-4 border border-white/10 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+                >
+                  <UserCheck className="w-4 h-4" /> Continue as Guest (Offline)
+                </button>
               )}
-            </button>
+            </div>
           </form>
 
           <div className="mt-12 text-center">

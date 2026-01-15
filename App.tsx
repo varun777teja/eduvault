@@ -16,7 +16,28 @@ import LoginView from './components/LoginView';
 import NotificationSystem from './components/NotificationSystem';
 import { Document, AppNotification } from './types';
 import { soundService } from './services/soundService';
-import { supabase } from './services/supabase';
+import { supabase, isSupabaseConfigured } from './services/supabase';
+
+const INITIAL_DOCS: Document[] = [
+  {
+    id: '1',
+    title: 'Introduction to Quantum Physics',
+    author: 'Richard Feynman',
+    category: 'Science',
+    uploadDate: '2024-03-15',
+    content: 'Quantum mechanics is a fundamental theory in physics...',
+    coverUrl: 'https://picsum.photos/seed/physics/300/400'
+  },
+  {
+    id: '2',
+    title: 'The Great Gatsby - Chapter 1 Notes',
+    author: 'F. Scott Fitzgerald',
+    category: 'Literature',
+    uploadDate: '2024-03-10',
+    content: 'In my younger and more vulnerable years...',
+    coverUrl: 'https://picsum.photos/seed/gatsby/300/400'
+  }
+];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -24,16 +45,27 @@ const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [isLocalMode, setIsLocalMode] = useState(!isSupabaseConfigured);
 
   // Check auth session
   useEffect(() => {
     const initSession = async () => {
+      if (!isSupabaseConfigured) {
+        // Fallback to local storage session if Supabase isn't configured
+        const localAuth = localStorage.getItem('eduvault_local_auth');
+        if (localAuth === 'true') {
+          setSession({ user: { id: 'local-user', email: 'guest@eduvault.local' } });
+        }
+        setIsAuthLoading(false);
+        return;
+      }
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
       } catch (error) {
         console.error('Failed to initialize Supabase session:', error);
-        // We stay in a "logged out" state if the session check fails (e.g., misconfigured URL)
+        setIsLocalMode(true);
         setSession(null);
       } finally {
         setIsAuthLoading(false);
@@ -42,21 +74,27 @@ const App: React.FC = () => {
 
     initSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    if (isSupabaseConfigured) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
-  // Fetch documents from Supabase when session changes
+  // Fetch documents (Supabase or Local)
   useEffect(() => {
     if (session) {
-      fetchDocuments();
+      if (isLocalMode) {
+        const saved = localStorage.getItem('eduvault_docs');
+        setDocuments(saved ? JSON.parse(saved) : INITIAL_DOCS);
+      } else {
+        fetchDocumentsFromSupabase();
+      }
     }
-  }, [session]);
+  }, [session, isLocalMode]);
 
-  const fetchDocuments = async () => {
+  const fetchDocumentsFromSupabase = async () => {
     try {
       const { data, error } = await supabase
         .from('documents')
@@ -67,19 +105,21 @@ const App: React.FC = () => {
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      // Only show notification if we are actually trying to reach a real Supabase instance
-      if (!process.env.SUPABASE_URL?.includes('placeholder')) {
-        addNotification('alert', 'Connection Error', 'Could not fetch your documents from the vault.');
-      }
+      setIsLocalMode(true); // Switch to local mode if fetch fails
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Logout error:', error);
-      setSession(null); // Force clear session state anyway
+    if (isLocalMode) {
+      localStorage.removeItem('eduvault_local_auth');
+      setSession(null);
+    } else {
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error('Logout error:', error);
+        setSession(null);
+      }
     }
   };
 
@@ -101,19 +141,28 @@ const App: React.FC = () => {
   };
 
   const removeDocument = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+    if (isLocalMode) {
+      setDocuments(prev => {
+        const updated = prev.filter(d => d.id !== id);
+        localStorage.setItem('eduvault_docs', JSON.stringify(updated));
+        return updated;
+      });
+      addNotification('success', 'Document Removed', 'The item was deleted from your local vault.');
+    } else {
+      try {
+        const { error } = await supabase
+          .from('documents')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
 
-      setDocuments(prev => prev.filter(d => d.id !== id));
-      addNotification('success', 'Document Removed', 'The item was deleted from your vault.');
-    } catch (error) {
-      console.error('Error removing document:', error);
-      addNotification('alert', 'Error', 'Failed to remove the document.');
+        setDocuments(prev => prev.filter(d => d.id !== id));
+        addNotification('success', 'Document Removed', 'The item was deleted from your cloud vault.');
+      } catch (error) {
+        console.error('Error removing document:', error);
+        addNotification('alert', 'Error', 'Failed to remove the document.');
+      }
     }
   };
 
@@ -132,7 +181,14 @@ const App: React.FC = () => {
     return (
       <HashRouter>
         <Routes>
-          <Route path="/login" element={<LoginView onLogin={() => {}} />} />
+          <Route path="/login" element={
+            <LoginView onLogin={() => {
+              if (isLocalMode) {
+                localStorage.setItem('eduvault_local_auth', 'true');
+                setSession({ user: { id: 'local-user' } });
+              }
+            }} />
+          } />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </HashRouter>
@@ -147,6 +203,11 @@ const App: React.FC = () => {
         <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
           <Navbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
           <main className="flex-1 overflow-y-auto custom-scrollbar">
+            {isLocalMode && (
+              <div className="bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 text-center flex items-center justify-center gap-2">
+                <span className="animate-pulse">●</span> Local Vault Mode: Data is saved to your browser only
+              </div>
+            )}
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
