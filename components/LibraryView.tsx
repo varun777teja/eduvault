@@ -87,9 +87,28 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
         </div>
       </header>
 
+      {/* Category Filter */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-slate-100">
+        {categories.map(cat => (
+          <button 
+            key={cat} 
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory === cat ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:border-slate-300'}`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {filteredDocs.map((doc) => (
-          <div key={doc.id} className="group bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col">
+          <div key={doc.id} className="group bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col relative">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onRemove(doc.id); }}
+              className="absolute top-4 right-4 z-20 p-2.5 bg-white/90 backdrop-blur-md rounded-xl text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all border border-slate-100 shadow-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
             <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
               <img src={doc.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" />
               <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">

@@ -69,6 +69,34 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Heartbeat for Study Time Tracking
+  useEffect(() => {
+    if (!session) return;
+    const interval = setInterval(async () => {
+      const today = new Date().toISOString().split('T')[0];
+      if (isLocalMode) {
+        const stats = JSON.parse(localStorage.getItem('eduvault_study_stats') || '{}');
+        stats[today] = (stats[today] || 0) + 1;
+        localStorage.setItem('eduvault_study_stats', JSON.stringify(stats));
+      } else {
+        const { data: existing } = await supabase
+          .from('study_sessions')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('date', today)
+          .single();
+
+        if (existing) {
+          await supabase.from('study_sessions').update({ minutes: existing.minutes + 1 }).eq('id', existing.id);
+        } else {
+          await supabase.from('study_sessions').insert([{ user_id: session.user.id, date: today, minutes: 1 }]);
+        }
+      }
+    }, 60000); // Every 1 minute
+
+    return () => clearInterval(interval);
+  }, [session, isLocalMode]);
+
   useEffect(() => {
     if (!session) return;
     if (isLocalMode) {
@@ -92,6 +120,28 @@ const App: React.FC = () => {
       if (tasksRes.data) setTasks(tasksRes.data);
       setSyncStatus('synced');
     } catch { setSyncStatus('error'); }
+  };
+
+  const handleDeleteDocument = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this document? This action cannot be undone.")) return;
+    
+    setSyncStatus('syncing');
+    try {
+      if (isLocalMode) {
+        const updated = documents.filter(d => d.id !== id);
+        setDocuments(updated);
+        localStorage.setItem('eduvault_docs', JSON.stringify(updated));
+      } else {
+        const { error } = await supabase.from('documents').delete().eq('id', id);
+        if (error) throw error;
+        setDocuments(prev => prev.filter(d => d.id !== id));
+      }
+      addNotification('success', 'Deleted', 'Document removed from vault.');
+      setSyncStatus('synced');
+    } catch {
+      addNotification('alert', 'Error', 'Failed to delete document.');
+      setSyncStatus('error');
+    }
   };
 
   const handleLogout = async () => {
@@ -143,14 +193,14 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
-              <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={() => {}} />} />
+              <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={handleDeleteDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
               <Route path="/ai-vault" element={<AIPage documents={documents} />} />
               <Route path="/notebook" element={<NotebookAI />} />
               <Route path="/stats" element={<Stats documents={documents} tasks={tasks} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} initialTasks={tasks} />} />
               <Route path="/profile" element={<ProfileView documents={documents} onLogout={handleLogout} />} />
-              <Route path="/admin" element={isAdmin ? <AdminPortal documents={documents} onRemove={() => {}} /> : <Navigate to="/" replace />} />
+              <Route path="/admin" element={isAdmin ? <AdminPortal documents={documents} onRemove={handleDeleteDocument} /> : <Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
