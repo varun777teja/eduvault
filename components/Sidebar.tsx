@@ -16,10 +16,16 @@ import {
   Sparkles,
   CalendarDays,
   User,
-  ShieldCheck
+  ShieldAlert,
+  // Fix: Added missing ArrowUpRight icon import
+  ArrowUpRight
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isAdmin?: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
   const location = useLocation();
   
   const mainLinks = [
@@ -46,7 +52,7 @@ const Sidebar: React.FC = () => {
              <img 
                src="https://i.ibb.co/zhbHCxnh/logo.png" 
                alt="EduVault Logo" 
-               className="w-full h-full object-contain" 
+               className="w-full h-full object-contain p-1.5" 
                onError={(e) => {
                  e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/3413/3413535.png";
                }}
@@ -60,6 +66,27 @@ const Sidebar: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar space-y-10">
+        {isAdmin && (
+          <section className="bg-slate-900 mx-2 p-1 rounded-2xl">
+            <div className="text-[9px] font-black text-amber-500 uppercase tracking-widest px-4 py-2 flex items-center gap-2">
+              <ShieldAlert className="w-3 h-3" /> Privileged Access
+            </div>
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => 
+                `flex items-center justify-between px-4 py-3 rounded-xl text-[12px] font-bold transition-all ${
+                  isActive 
+                    ? 'bg-amber-500 text-slate-950 shadow-lg' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`
+              }
+            >
+              <span>Admin Terminal</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </NavLink>
+          </section>
+        )}
+
         <section>
           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-4">Discovery</div>
           <nav className="space-y-1.5">

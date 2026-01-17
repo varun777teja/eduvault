@@ -20,46 +20,33 @@ export const isSupabaseConfigured =
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
- * --- DATABASE SETUP INSTRUCTIONS ---
+ * --- UPDATED DATABASE SETUP INSTRUCTIONS ---
  * Run the following SQL in your Supabase SQL Editor:
  * 
- * -- 1. Create Tables
- * CREATE TABLE public.documents (
- *    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
- *    user_id UUID REFERENCES auth.users NOT NULL,
- *    title TEXT NOT NULL,
- *    author TEXT,
- *    category TEXT,
- *    content TEXT,
- *    cover_url TEXT,
- *    created_at TIMESTAMPTZ DEFAULT NOW()
+ * -- 1. Update Documents Table to support Public Library
+ * ALTER TABLE public.documents ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT FALSE;
+ * 
+ * -- 2. Refined RLS (Security) for Public/Private Access
+ * DROP POLICY IF EXISTS "Individual user access" ON public.documents;
+ * 
+ * -- Students can see their own docs OR any doc marked public
+ * CREATE POLICY "General Access Policy" ON public.documents 
+ * FOR SELECT USING (auth.uid() = user_id OR is_public = true);
+ * 
+ * -- Students can only insert their own
+ * CREATE POLICY "Individual Insert" ON public.documents 
+ * FOR INSERT WITH CHECK (auth.uid() = user_id);
+ * 
+ * -- Admins or Owners can update/delete
+ * CREATE POLICY "Admin/Owner Update" ON public.documents 
+ * FOR UPDATE USING (
+ *   auth.uid() = user_id OR 
+ *   (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean = true
  * );
  * 
- * CREATE TABLE public.tasks (
- *    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
- *    user_id UUID REFERENCES auth.users NOT NULL,
- *    title TEXT NOT NULL,
- *    date TEXT NOT NULL,
- *    time TEXT NOT NULL,
- *    duration INTEGER DEFAULT 30,
- *    completed BOOLEAN DEFAULT FALSE,
- *    priority TEXT DEFAULT 'medium',
- *    created_at TIMESTAMPTZ DEFAULT NOW()
+ * CREATE POLICY "Admin/Owner Delete" ON public.documents 
+ * FOR DELETE USING (
+ *   auth.uid() = user_id OR 
+ *   (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean = true
  * );
- * 
- * -- 2. Enable Realtime Replication
- * -- Go to Database > Replication > Source: public and Toggle: documents, tasks
- * -- OR run this SQL:
- * alter publication supabase_realtime add table documents;
- * alter publication supabase_realtime add table tasks;
- * 
- * -- 3. Enable RLS (Security)
- * ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
- * ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
- * 
- * CREATE POLICY "Individual user access" ON public.documents 
- * FOR ALL USING (auth.uid() = user_id);
- * 
- * CREATE POLICY "Individual task access" ON public.tasks 
- * FOR ALL USING (auth.uid() = user_id);
  */

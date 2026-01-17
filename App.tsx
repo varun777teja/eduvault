@@ -15,6 +15,7 @@ import ProfileView from './components/ProfileView.tsx';
 import LoginView from './components/LoginView.tsx';
 import NotificationSystem from './components/NotificationSystem.tsx';
 import AIPage from './components/AIPage.tsx';
+import AdminPortal from './components/AdminPortal.tsx';
 import { Document, AppNotification, Task } from './types.ts';
 import { soundService } from './services/soundService.ts';
 import { supabase, isSupabaseConfigured } from './services/supabase.ts';
@@ -40,6 +41,9 @@ const App: React.FC = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLocalMode, setIsLocalMode] = useState(!isSupabaseConfigured);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
+
+  // Admin Check
+  const isAdmin = session?.user?.user_metadata?.is_admin === true;
 
   // Check auth session
   useEffect(() => {
@@ -230,7 +234,7 @@ const App: React.FC = () => {
     <HashRouter>
       <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900">
         <NotificationSystem notifications={notifications} removeNotification={removeNotification} />
-        <Sidebar />
+        <Sidebar isAdmin={isAdmin} />
         <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
           <Navbar searchTerm={searchTerm} onSearchChange={setSearchTerm} syncStatus={syncStatus} />
           <main className="flex-1 overflow-y-auto custom-scrollbar">
@@ -249,6 +253,13 @@ const App: React.FC = () => {
               <Route path="/stats" element={<Stats documents={documents} tasks={tasks} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} initialTasks={tasks} />} />
               <Route path="/profile" element={<ProfileView documents={documents} onLogout={handleLogout} />} />
+              
+              {/* Admin Protected Route */}
+              <Route 
+                path="/admin" 
+                element={isAdmin ? <AdminPortal documents={documents} onRemove={removeDocument} /> : <Navigate to="/" replace />} 
+              />
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

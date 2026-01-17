@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Chat, GenerateContentResponse, Type, Modality } from "@google/genai";
+import { GoogleGenAI, Chat, GenerateContentResponse, Type, Modality, LiveServerMessage, Blob } from "@google/genai";
 
 const getAIClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -45,25 +45,78 @@ export const getOrCreateChatSession = (docId: string, docContent: string): Chat 
 };
 
 /**
- * Audio Overview Engine: Generates a 2-person podcast script and audio
+ * Generates a short, inspiring daily academic insight for the student dashboard.
+ */
+export const getDailyAcademicInsight = async () => {
+  const ai = getAIClient();
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: "Give a one-sentence inspiring academic insight or a quick study tip for a high-performing student.",
+      config: {
+        thinkingConfig: { thinkingBudget: 0 }
+      }
+    });
+    return response.text || "Success is the sum of small efforts repeated day in and day out.";
+  } catch (error) {
+    return "The secret of getting ahead is getting started.";
+  }
+};
+
+/**
+ * AI Book Cover Generator using nano banana series
+ */
+export const generateBookCover = async (title: string, category: string) => {
+  const ai = getAIClient();
+  const prompt = `A professional, modern, and academic book cover for a book titled "${title}" in the category of "${category}". Style: Clean, high-contrast, minimalist graphic design. No text on the image, just visual metaphors.`;
+  
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash-image',
+    contents: { parts: [{ text: prompt }] },
+    config: {
+      imageConfig: { aspectRatio: "3:4" }
+    }
+  });
+
+  for (const part of response.candidates[0].content.parts) {
+    if (part.inlineData) {
+      return `data:image/png;base64,${part.inlineData.data}`;
+    }
+  }
+  return null;
+};
+
+/**
+ * Live Study Assistant (Real-time voice)
+ */
+export const connectLiveAssistant = (callbacks: any, docContent: string) => {
+  const ai = getAIClient();
+  return ai.live.connect({
+    model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+    callbacks,
+    config: {
+      responseModalities: [Modality.AUDIO],
+      speechConfig: {
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+      },
+      systemInstruction: `You are a real-time study buddy. Help the student understand this document: ${docContent.substring(0, 5000)}. Keep your spoken responses concise and conversational.`,
+    },
+  });
+};
+
+/**
+ * Audio Overview Engine
  */
 export const generateAudioOverview = async (content: string) => {
   const ai = getAIClient();
-  
-  // 1. Generate Podcast Script
   const scriptResponse = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Based on this content, write a highly engaging, casual podcast conversation between Joe and Jane. 
                They should simplify complex ideas, use analogies, and banter naturally.
                Content: "${content.substring(0, 5000)}"`,
-    config: {
-      systemInstruction: "Format the output strictly as a conversation starting with names like 'Joe:' and 'Jane:'."
-    }
   });
 
   const script = scriptResponse.text || "";
-
-  // 2. Generate Audio via Multi-Speaker TTS
   const audioResponse = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
     contents: [{ parts: [{ text: `TTS the following conversation between Joe and Jane: ${script}` }] }],
@@ -84,13 +137,8 @@ export const generateAudioOverview = async (content: string) => {
   return { script, base64Audio };
 };
 
-/**
- * Semantic Mind-Map Extraction
- */
 export const getSemanticMap = async (documents: any[]) => {
   const ai = getAIClient();
-  const context = documents.map(d => `${d.title}: ${d.content.substring(0, 500)}`).join('\n---\n');
-  
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Analyze these documents and create a network of related concepts. 
@@ -104,35 +152,23 @@ export const getSemanticMap = async (documents: any[]) => {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                label: { type: Type.STRING },
-                group: { type: Type.STRING }
-              }
+              properties: { id: { type: Type.STRING }, label: { type: Type.STRING }, group: { type: Type.STRING } }
             }
           },
           links: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
-              properties: {
-                source: { type: Type.STRING },
-                target: { type: Type.STRING },
-                relationship: { type: Type.STRING }
-              }
+              properties: { source: { type: Type.STRING }, target: { type: Type.STRING }, relationship: { type: Type.STRING } }
             }
           }
         }
       }
     }
   });
-
   return JSON.parse(response.text || '{"nodes":[], "links":[]}');
 };
 
-/**
- * Debate Mode: Generates two opposing expert perspectives
- */
 export const getPerspectiveDebate = async (topic: string, content: string) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
@@ -145,22 +181,14 @@ export const getPerspectiveDebate = async (topic: string, content: string) => {
 
 export const scanDocumentImage = async (base64Image: string) => {
   const ai = getAIClient();
-  const imagePart = {
-    inlineData: { mimeType: 'image/jpeg', data: base64Image },
-  };
-  
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: { parts: [imagePart, { text: "Analyze this and extract markdown text, title, and category." }] },
+    contents: { parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }, { text: "Analyze and extract text, title, and category." }] },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          category: { type: Type.STRING },
-          content: { type: Type.STRING }
-        },
+        properties: { title: { type: Type.STRING }, category: { type: Type.STRING }, content: { type: Type.STRING } },
         required: ["title", "category", "content"]
       }
     }
@@ -195,41 +223,30 @@ export const chatWithAI = async (query: string) => {
   }
 };
 
-/**
- * Explains a selected concept within the context of a document.
- */
 export const explainConcept = async (concept: string, context: string) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Explain the following concept: "${concept}" within the context of this text: "${context.substring(0, 2000)}"`,
-    config: {
-      tools: [{ googleSearch: {} }]
-    }
+    contents: `Explain: "${concept}" within the context: "${context.substring(0, 2000)}"`,
+    config: { tools: [{ googleSearch: {} }] }
   });
   return { text: response.text || "", sources: getSources(response) };
 };
 
-/**
- * Generates a practice quiz based on content.
- */
 export const generateQuiz = async (content: string) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Based on this content, generate a multiple choice quiz to test understanding: "${content.substring(0, 4000)}"`,
+    contents: `Generate a practice quiz for: "${content.substring(0, 4000)}"`,
   });
   return response.text;
 };
 
-/**
- * Creates a study roadmap for a document.
- */
 export const createStudyRoadmap = async (content: string) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Create a step-by-step study roadmap to master this material: "${content.substring(0, 4000)}"`,
+    contents: `Create a study roadmap for: "${content.substring(0, 4000)}"`,
   });
   return response.text;
 };
