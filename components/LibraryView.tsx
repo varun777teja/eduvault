@@ -2,7 +2,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { 
   Search, Trash2, BookOpen, Clock, LayoutGrid, List, FileSearch, Sparkles,
-  Plus, X, Upload, Loader2, Check, Camera, Zap, ArrowRight, ShieldCheck, ImagePlus
+  Plus, X, Upload, Loader2, Check, Camera, Zap, ArrowRight, ShieldCheck, ImagePlus,
+  AlertTriangle, Trash
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Document } from '../types';
@@ -22,6 +23,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isGeneratingCover, setIsGeneratingCover] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -75,6 +77,11 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
     }
   };
 
+  const confirmDelete = (id: string) => {
+    onRemove(id);
+    setConfirmDeleteId(null);
+  };
+
   return (
     <div className="p-6 lg:p-10 space-y-8 animate-in fade-in pb-32 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -104,7 +111,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
         {filteredDocs.map((doc) => (
           <div key={doc.id} className="group bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col relative">
             <button 
-              onClick={(e) => { e.stopPropagation(); onRemove(doc.id); }}
+              onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(doc.id); }}
               className="absolute top-4 right-4 z-20 p-2.5 bg-white/90 backdrop-blur-md rounded-xl text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all border border-slate-100 shadow-sm"
             >
               <Trash2 className="w-4 h-4" />
@@ -128,6 +135,34 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
           </div>
         ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)}></div>
+          <div className="relative bg-white w-full max-w-md rounded-[2.5rem] p-8 lg:p-10 shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-rose-100 shadow-sm">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight text-center mb-2">Delete Book?</h2>
+            <p className="text-slate-500 text-sm text-center mb-8">This action is irreversible and will remove all study history associated with this document.</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => confirmDelete(confirmDeleteId)}
+                className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-rose-200 active:scale-95 transition-all"
+              >
+                Permanently Delete
+              </button>
+              <button 
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 py-4 bg-slate-100 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Keep it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">

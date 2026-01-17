@@ -5,7 +5,7 @@ import {
   ArrowLeft, ChevronRight, TrendingUp,
   BookOpen, Calendar, Target, Library,
   Sparkles, History, ArrowUpRight, CheckSquare,
-  Timer, Loader2
+  Timer, Loader2, Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Document, Task } from '../types';
@@ -21,6 +21,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
   const [sessionStats, setSessionStats] = useState({ minutes: 0, ai_hits: 0 });
   const [realStudyData, setRealStudyData] = useState<{ day: string, mastery: number }[]>([]);
   const [readHistory, setReadHistory] = useState<any[]>([]);
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStudyData = async () => {
@@ -33,13 +34,12 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
 
       let masteryData: { day: string, mastery: number }[] = [];
 
-      // Add explicit types to fix "unknown" and arithmetic operation errors
       if (!isSupabaseConfigured) {
         const localStatsData = localStorage.getItem('eduvault_study_stats');
         const localStats: Record<string, number> = localStatsData ? JSON.parse(localStatsData) : {};
         masteryData = last7Days.map(date => ({
           day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-          mastery: Math.min(100, (Number(localStats[date]) || 0) * 2) // scale 1 min = 2% mastery for viz
+          mastery: Math.min(100, (Number(localStats[date]) || 0) * 2) 
         }));
         const totalToday = Number(localStats[today.toISOString().split('T')[0]]) || 0;
         setSessionStats(prev => ({ ...prev, minutes: totalToday }));
@@ -60,7 +60,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
           }
           masteryData = last7Days.map(date => ({
             day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-            mastery: Math.min(100, (sessionMap.get(date) || 0) * 1.5) // Scale viz
+            mastery: Math.min(100, (sessionMap.get(date) || 0) * 1.5)
           }));
           const todayMinutes = Number(sessionMap.get(today.toISOString().split('T')[0])) || 0;
           setSessionStats(prev => ({ ...prev, minutes: todayMinutes }));
@@ -76,7 +76,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
 
     fetchStudyData();
     loadHistory();
-    const interval = setInterval(fetchStudyData, 30000); // Sync data every 30s
+    const interval = setInterval(fetchStudyData, 30000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -113,17 +113,34 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
 
   const graphWidth = 600;
   const graphHeight = 200;
-  const points = realStudyData.length > 0 ? realStudyData.map((d, i) => ({
-    x: (i / (realStudyData.length - 1)) * graphWidth,
-    y: graphHeight - (d.mastery / 100) * graphHeight
-  })) : [];
   
-  const pathData = points.length > 0 
-    ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
-    : '';
-  const areaData = points.length > 0 
-    ? `${pathData} L ${points[points.length-1].x} ${graphHeight} L ${points[0].x} ${graphHeight} Z`
-    : '';
+  const points = useMemo(() => {
+    return realStudyData.map((d, i) => ({
+      x: (i / (realStudyData.length - 1)) * graphWidth,
+      y: graphHeight - (d.mastery / 100) * (graphHeight - 20) - 10,
+      mastery: d.mastery
+    }));
+  }, [realStudyData]);
+
+  const smoothPath = useMemo(() => {
+    if (points.length < 2) return '';
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cp1x = p0.x + (p1.x - p0.x) / 2;
+      const cp1y = p0.y;
+      const cp2x = p0.x + (p1.x - p0.x) / 2;
+      const cp2y = p1.y;
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  }, [points]);
+
+  const areaPath = useMemo(() => {
+    if (!smoothPath) return '';
+    return `${smoothPath} L ${points[points.length - 1].x} ${graphHeight} L ${points[0].x} ${graphHeight} Z`;
+  }, [smoothPath, points]);
 
   return (
     <div className="max-w-6xl mx-auto p-4 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-28 lg:pb-10">
@@ -157,7 +174,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
               </div>
             </div>
 
-            <div className="relative h-64 w-full">
+            <div className="relative h-64 w-full px-2">
               {realStudyData.length > 0 ? (
                 <>
                 <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
@@ -170,15 +187,32 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                   {[0, 25, 50, 75, 100].map(val => (
                     <line 
                       key={val}
-                      x1="0" y1={graphHeight - (val/100)*graphHeight} 
-                      x2={graphWidth} y2={graphHeight - (val/100)*graphHeight} 
+                      x1="0" y1={graphHeight - (val/100)*(graphHeight-20) - 10} 
+                      x2={graphWidth} y2={graphHeight - (val/100)*(graphHeight-20) - 10} 
                       stroke="#f1f5f9" strokeWidth="1" 
+                      strokeDasharray="4 4"
                     />
                   ))}
-                  <path d={areaData} fill="url(#graphGradient)" />
-                  <path d={pathData} fill="none" stroke="#4f46e5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d={areaPath} fill="url(#graphGradient)" className="transition-all duration-700" />
+                  <path d={smoothPath} fill="none" stroke="#4f46e5" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-all duration-700 drop-shadow-[0_4px_10px_rgba(79,70,229,0.3)]" />
+                  
                   {points.map((p, i) => (
-                    <circle key={i} cx={p.x} cy={p.y} r="6" fill="#4f46e5" className="transition-all duration-300" />
+                    <g key={i} onMouseEnter={() => setHoveredPoint(i)} onMouseLeave={() => setHoveredPoint(null)}>
+                      <circle 
+                        cx={p.x} cy={p.y} r={hoveredPoint === i ? "8" : "6"} 
+                        fill="white" 
+                        stroke="#4f46e5" 
+                        strokeWidth="3"
+                        className="transition-all duration-300 cursor-pointer" 
+                      />
+                      {hoveredPoint === i && (
+                        <foreignObject x={p.x - 30} y={p.y - 45} width="60" height="35">
+                          <div className="bg-slate-900 text-white text-[10px] font-black py-1 rounded-lg text-center shadow-xl border border-white/10">
+                            {Math.round(p.mastery)}%
+                          </div>
+                        </foreignObject>
+                      )}
+                    </g>
                   ))}
                 </svg>
                 <div className="flex justify-between mt-6 px-1">

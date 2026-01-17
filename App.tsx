@@ -123,8 +123,6 @@ const App: React.FC = () => {
   };
 
   const handleDeleteDocument = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this document? This action cannot be undone.")) return;
-    
     setSyncStatus('syncing');
     try {
       if (isLocalMode) {
