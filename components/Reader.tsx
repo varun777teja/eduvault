@@ -158,7 +158,7 @@ const Reader: React.FC<ReaderProps> = ({ documents }) => {
             {chatMessages.length === 0 && (
               <div className="text-center py-16 px-6">
                 <div className="w-20 h-20 bg-white border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl animate-icon-pulse overflow-hidden p-4">
-                  <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-full h-full object-contain" />
+                  <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-full h-full object-contain" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900">Academic Intelligence</h3>
               </div>

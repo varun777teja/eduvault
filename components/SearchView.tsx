@@ -73,15 +73,6 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
     );
   }, [documents, searchTerm]);
 
-  const jobSuggestions = useMemo(() => {
-    if (!searchTerm) return [];
-    return [
-      { title: "AI Intern", company: "BrainLab", type: "Remote" },
-      { title: "Content Writer", company: "Edutext", type: "Full-time" },
-      { title: "Software Engineer", company: "EduVault", type: "Hybrid" }
-    ].filter(j => j.title.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm.toLowerCase().includes('job') || searchTerm.toLowerCase().includes('career'));
-  }, [searchTerm]);
-
   const handleStartChat = () => {
     setActiveTab('chat');
     if (aiInsight && chatMessages.length === 0) {
@@ -126,6 +117,15 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
       setIsChatLoading(false);
     }
   };
+
+  const jobSuggestions = useMemo(() => {
+    if (!searchTerm) return [];
+    return [
+      { title: "AI Intern", company: "BrainLab", type: "Remote" },
+      { title: "Content Writer", company: "Edutext", type: "Full-time" },
+      { title: "Software Engineer", company: "EduVault", type: "Hybrid" }
+    ].filter(j => j.title.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm.toLowerCase().includes('job') || searchTerm.toLowerCase().includes('career'));
+  }, [searchTerm]);
 
   return (
     <div className="max-w-6xl mx-auto p-4 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32">
@@ -205,7 +205,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
               >
                 {tab.icon === 'image' ? (
                    <div className="w-4 h-4">
-                     <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="" className="w-full h-full object-contain" />
+                     <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="" className="w-full h-full object-contain" />
                    </div>
                 ) : <tab.icon className="w-3.5 h-3.5" />}
                 {tab.label}
@@ -220,7 +220,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 p-1.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/20 animate-icon-pulse flex items-center justify-center">
-                      <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain brightness-0 invert" />
+                      <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="AI" className="w-full h-full object-contain" />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">AI Quick Answer</span>
                   </div>
@@ -259,7 +259,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center p-2 text-white shadow-lg">
-                      <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain brightness-0 invert" />
+                      <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="AI" className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Socratic Assistant</h3>
@@ -272,7 +272,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                   {chatMessages.length === 0 && !isChatLoading && (
                     <div className="h-full flex flex-col items-center justify-center text-center p-8">
                        <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 animate-bounce-subtle p-3">
-                         <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain" />
+                         <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="AI" className="w-full h-full object-contain" />
                        </div>
                        <h4 className="text-lg font-black text-slate-900">Ask the Academic Assistant</h4>
                        <p className="text-sm text-slate-500 max-w-xs mt-2">I'm here to help you understand "{searchTerm}" in-depth. What would you like to know?</p>
@@ -283,7 +283,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
                       <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                          <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center overflow-hidden ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-900 text-white p-1.5'}`}>
-                           {msg.role === 'user' ? <User className="w-4 h-4" /> : <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-full h-full object-contain brightness-0 invert" />}
+                           {msg.role === 'user' ? <User className="w-4 h-4" /> : <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-full h-full object-contain" />}
                          </div>
                          <div className={`p-4 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
                            msg.role === 'user' 
@@ -299,7 +299,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                     <div className="flex justify-start">
                       <div className="flex gap-3 max-w-[80%]">
                          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center p-1.5">
-                           <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-full h-full object-contain brightness-0 invert" />
+                           <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-full h-full object-contain" />
                          </div>
                          <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-none flex items-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />

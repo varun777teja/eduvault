@@ -85,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
              {aiTools.map((tool) => (
               <NavLink key={tool.label} to={tool.to} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12px] font-bold text-slate-600 hover:text-indigo-600 group">
                 <div className={`w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${tool.color}`}>
-                   {tool.icon === 'image' ? <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-5 h-5 object-contain" /> : <tool.icon className="w-4 h-4" />}
+                   {tool.icon === 'image' ? <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-5 h-5 object-contain" /> : <tool.icon className="w-4 h-4" />}
                 </div>
                 <span>{tool.label}</span>
               </NavLink>
