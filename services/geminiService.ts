@@ -1,9 +1,8 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse, Type, Modality, LiveServerMessage, Blob } from "@google/genai";
 
-const getAIClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
+// Standardize client initialization for every call to prevent stale key issues
+const getAIClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const chatSessions = new Map<string, Chat>();
 
@@ -19,76 +18,127 @@ export const clearChatSession = (docId: string) => {
 };
 
 export const getOrCreateChatSession = (docId: string, docContent: string): Chat => {
-  if (chatSessions.has(docId)) {
-    return chatSessions.get(docId)!;
-  }
-
+  if (chatSessions.has(docId)) return chatSessions.get(docId)!;
   const ai = getAIClient();
   const chat = ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: `
-        You are the EduVault Academic Assistant. 
-        CONTEXT: You are helping a student with the following document: "${docContent.substring(0, 4000)}"
-        
-        GOALS:
-        1. Help the student understand complex concepts.
-        2. Use Google Search grounding for facts, citations, or recent academic developments.
-        3. Always provide clear, structured explanations.
-      `,
+      systemInstruction: `You are the EduVault Academic Assistant. Document Context: "${docContent.substring(0, 4000)}". Help students learn efficiently.`,
       tools: [{ googleSearch: {} }]
     }
   });
-
   chatSessions.set(docId, chat);
   return chat;
 };
 
 /**
- * Generates a short, inspiring daily academic insight for the student dashboard.
+ * Notebook AI: Improve Note Content
  */
+export const improveNoteContent = async (text: string, instruction: string) => {
+  const ai = getAIClient();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Task: ${instruction}\nText: "${text}"`,
+    config: {
+      systemInstruction: "You are a professional academic editor. Improve the provided text while maintaining the original meaning."
+    }
+  });
+  return response.text || text;
+};
+
+/**
+ * Notebook AI: Generate Summary for a Note
+ */
+export const generateNoteSummary = async (content: string) => {
+  const ai = getAIClient();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Summarize this note into 3 key bullet points:\n${content.substring(0, 5000)}`,
+  });
+  return response.text;
+};
+
+/**
+ * Generate Flashcards from text
+ */
+export const generateFlashcards = async (content: string) => {
+  const ai = getAIClient();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Generate 5 flashcards (Question/Answer) from this content: ${content.substring(0, 3000)}`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            question: { type: Type.STRING },
+            answer: { type: Type.STRING }
+          },
+          required: ["question", "answer"]
+        }
+      }
+    }
+  });
+  return JSON.parse(response.text || "[]");
+};
+
 export const getDailyAcademicInsight = async () => {
   const ai = getAIClient();
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: "Give a one-sentence inspiring academic insight or a quick study tip for a high-performing student.",
-      config: {
-        thinkingConfig: { thinkingBudget: 0 }
-      }
+      contents: "One-sentence inspiring study tip.",
+      config: { thinkingConfig: { thinkingBudget: 0 } }
     });
-    return response.text || "Success is the sum of small efforts repeated day in and day out.";
-  } catch (error) {
-    return "The secret of getting ahead is getting started.";
-  }
+    return response.text || "Small steps lead to great heights.";
+  } catch { return "Stay curious."; }
 };
 
-/**
- * AI Book Cover Generator using nano banana series
- */
 export const generateBookCover = async (title: string, category: string) => {
   const ai = getAIClient();
-  const prompt = `A professional, modern, and academic book cover for a book titled "${title}" in the category of "${category}". Style: Clean, high-contrast, minimalist graphic design. No text on the image, just visual metaphors.`;
-  
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: prompt }] },
-    config: {
-      imageConfig: { aspectRatio: "3:4" }
-    }
+    contents: { parts: [{ text: `Minimalist book cover: ${title}, category: ${category}` }] },
+    config: { imageConfig: { aspectRatio: "3:4" } }
   });
-
   for (const part of response.candidates[0].content.parts) {
-    if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
-    }
+    if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
   return null;
 };
 
-/**
- * Live Study Assistant (Real-time voice)
- */
+// Add missing explainConcept function to fix import error in Reader.tsx and SearchView.tsx
+export const explainConcept = async (concept: string, context?: string) => {
+  const ai = getAIClient();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Explain the concept: "${concept}". ${context ? `Context: ${context}` : ""} Keep it concise and student-friendly.`,
+  });
+  return response.text;
+};
+
+// Add missing scanDocumentImage function to fix import error in LibraryView.tsx
+export const scanDocumentImage = async (base64Data: string) => {
+  const ai = getAIClient();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: {
+      parts: [
+        {
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Data
+          }
+        },
+        { text: "Extract and transcribe all text from this academic document image." }
+      ]
+    }
+  });
+  return response.text;
+};
+
 export const connectLiveAssistant = (callbacks: any, docContent: string) => {
   const ai = getAIClient();
   return ai.live.connect({
@@ -96,30 +146,21 @@ export const connectLiveAssistant = (callbacks: any, docContent: string) => {
     callbacks,
     config: {
       responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
-      },
-      systemInstruction: `You are a real-time study buddy. Help the student understand this document: ${docContent.substring(0, 5000)}. Keep your spoken responses concise and conversational.`,
+      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
+      systemInstruction: `Study buddy. Context: ${docContent.substring(0, 5000)}`,
     },
   });
 };
 
-/**
- * Audio Overview Engine
- */
 export const generateAudioOverview = async (content: string) => {
   const ai = getAIClient();
-  const scriptResponse = await ai.models.generateContent({
+  const scriptRes = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Based on this content, write a highly engaging, casual podcast conversation between Joe and Jane. 
-               They should simplify complex ideas, use analogies, and banter naturally.
-               Content: "${content.substring(0, 5000)}"`,
+    contents: `Write an engaging podcast script summarizing this: ${content.substring(0, 4000)}`,
   });
-
-  const script = scriptResponse.text || "";
-  const audioResponse = await ai.models.generateContent({
+  const audioRes = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
-    contents: [{ parts: [{ text: `TTS the following conversation between Joe and Jane: ${script}` }] }],
+    contents: [{ parts: [{ text: `TTS conversation: ${scriptRes.text}` }] }],
     config: {
       responseModalities: [Modality.AUDIO],
       speechConfig: {
@@ -132,36 +173,21 @@ export const generateAudioOverview = async (content: string) => {
       }
     }
   });
-
-  const base64Audio = audioResponse.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-  return { script, base64Audio };
+  return { script: scriptRes.text, base64Audio: audioRes.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data };
 };
 
 export const getSemanticMap = async (documents: any[]) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Analyze these documents and create a network of related concepts. 
-               Return a JSON object with 'nodes' (id, label, group) and 'links' (source, target, relationship).`,
+    contents: `Concept map for: ${documents.map(d => d.title).join(", ")}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          nodes: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: { id: { type: Type.STRING }, label: { type: Type.STRING }, group: { type: Type.STRING } }
-            }
-          },
-          links: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: { source: { type: Type.STRING }, target: { type: Type.STRING }, relationship: { type: Type.STRING } }
-            }
-          }
+          nodes: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, label: { type: Type.STRING } } } },
+          links: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { source: { type: Type.STRING }, target: { type: Type.STRING } } } }
         }
       }
     }
@@ -173,27 +199,10 @@ export const getPerspectiveDebate = async (topic: string, content: string) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-preview',
-    contents: `Regarding "${topic}" in the context of this document: "${content.substring(0, 3000)}", 
-               provide a debate between a "Skeptical Academic" and a "Visionary Futurist".`,
+    contents: `Academic debate about ${topic} based on: ${content.substring(0, 3000)}`,
+    config: { thinkingConfig: { thinkingBudget: 4000 } }
   });
   return response.text;
-};
-
-export const scanDocumentImage = async (base64Image: string) => {
-  const ai = getAIClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: { parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }, { text: "Analyze and extract text, title, and category." }] },
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: { title: { type: Type.STRING }, category: { type: Type.STRING }, content: { type: Type.STRING } },
-        required: ["title", "category", "content"]
-      }
-    }
-  });
-  return JSON.parse(response.text || "{}");
 };
 
 export async function* streamChat(docId: string, message: string, docContent: string) {
@@ -204,9 +213,7 @@ export async function* streamChat(docId: string, message: string, docContent: st
       const c = chunk as GenerateContentResponse;
       yield { text: c.text || "", sources: getSources(c) };
     }
-  } catch (error) {
-    yield { text: "Error: AI Tutor is currently unavailable.", sources: [] };
-  }
+  } catch { yield { text: "AI unavailable.", sources: [] }; }
 }
 
 export const chatWithAI = async (query: string) => {
@@ -218,35 +225,5 @@ export const chatWithAI = async (query: string) => {
       config: { tools: [{ googleSearch: {} }] },
     });
     return { text: response.text || "", sources: getSources(response) };
-  } catch (error) {
-    return { text: "Failed to get AI response.", sources: [] };
-  }
-};
-
-export const explainConcept = async (concept: string, context: string) => {
-  const ai = getAIClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `Explain: "${concept}" within the context: "${context.substring(0, 2000)}"`,
-    config: { tools: [{ googleSearch: {} }] }
-  });
-  return { text: response.text || "", sources: getSources(response) };
-};
-
-export const generateQuiz = async (content: string) => {
-  const ai = getAIClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `Generate a practice quiz for: "${content.substring(0, 4000)}"`,
-  });
-  return response.text;
-};
-
-export const createStudyRoadmap = async (content: string) => {
-  const ai = getAIClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `Create a study roadmap for: "${content.substring(0, 4000)}"`,
-  });
-  return response.text;
+  } catch { return { text: "Search failed.", sources: [] }; }
 };

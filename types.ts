@@ -9,6 +9,15 @@ export interface Document {
   coverUrl?: string;
 }
 
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  lastEdited: string;
+  category: string;
+  tags: string[];
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
@@ -37,5 +46,6 @@ export interface AppNotification {
 export enum LibraryView {
   DASHBOARD = 'dashboard',
   READER = 'reader',
-  SETTINGS = 'settings'
+  SETTINGS = 'settings',
+  NOTEBOOK = 'notebook'
 }
