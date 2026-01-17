@@ -93,7 +93,10 @@ const NotebookAI: React.FC = () => {
       <div className={`w-full lg:w-80 bg-white border-r border-slate-200 flex flex-col h-full shrink-0 transition-all ${mobileView === 'editor' ? 'hidden lg:flex' : 'flex'}`}>
         <div className="p-4 lg:p-6 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-            <BrainCircuit className="w-5 h-5 text-indigo-600" /> Notebook AI
+            <div className="w-5 h-5 flex items-center justify-center">
+              <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-full h-full object-contain" alt="AI" />
+            </div>
+            Notebook AI
           </h2>
           <button onClick={createNote} className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all">
             <Plus className="w-5 h-5" />
@@ -149,7 +152,7 @@ const NotebookAI: React.FC = () => {
                   onClick={() => handleAiAction('improve')}
                   className="flex items-center gap-2 px-3 lg:px-5 py-2 lg:py-2.5 bg-indigo-600 text-white rounded-xl lg:rounded-2xl font-black text-[9px] lg:text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all disabled:opacity-50"
                 >
-                  {isAiProcessing ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : <Sparkles className="w-3 h-3 lg:w-4 lg:h-4" />}
+                  {isAiProcessing ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-3 h-3 lg:w-4 lg:h-4 object-contain brightness-0 invert" alt="" />}
                   <span className="hidden sm:inline">AI Improve</span>
                   <span className="sm:hidden">Improve</span>
                 </button>
@@ -168,6 +171,7 @@ const NotebookAI: React.FC = () => {
             {/* AI Floating Toolbox - Adjusted for mobile position and scale */}
             <div className="fixed lg:absolute bottom-28 lg:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-3 lg:py-4 bg-slate-950 text-white rounded-full lg:rounded-[2.5rem] shadow-2xl border border-white/10 backdrop-blur-xl z-40 scale-90 lg:scale-100">
                <div className="flex items-center gap-2 px-2 lg:px-3 border-r border-white/10 mr-1 lg:mr-2">
+                 <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-4 h-4 object-contain mr-2" alt="" />
                  <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-indigo-400">Notebook AI</span>
                </div>
                <button onClick={() => handleAiAction('summarize')} className="px-3 lg:px-4 py-2 hover:bg-white/10 rounded-xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest transition-all">Summarize</button>
@@ -176,8 +180,8 @@ const NotebookAI: React.FC = () => {
           </>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center p-10">
-             <div className="w-20 h-20 lg:w-24 lg:h-24 bg-slate-50 rounded-[2rem] lg:rounded-[2.5rem] flex items-center justify-center mb-6 lg:mb-8 border border-dashed border-slate-200">
-                <BookOpen className="w-8 h-8 lg:w-10 lg:h-10 text-slate-300" />
+             <div className="w-20 h-20 lg:w-24 lg:h-24 bg-slate-50 rounded-[2rem] lg:rounded-[2.5rem] flex items-center justify-center mb-6 lg:mb-8 border border-dashed border-slate-200 p-5">
+                <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-full h-full object-contain grayscale opacity-40" alt="" />
              </div>
              <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">Select a Notebook</h2>
              <p className="text-slate-500 max-w-xs mt-2 text-sm lg:text-base">Open an existing note or create a new one to start working.</p>
@@ -194,6 +198,7 @@ const NotebookAI: React.FC = () => {
               <div className="absolute top-0 right-0 w-48 h-48 lg:w-64 lg:h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-24 -mt-24 lg:-mr-32 lg:-mt-32"></div>
               <header className="flex items-center justify-between mb-6 lg:mb-8">
                  <div className="flex items-center gap-3">
+                    <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-6 h-6 object-contain" alt="" />
                     <div>
                        <h2 className="text-lg lg:text-xl font-black text-slate-900 tracking-tighter">AI Suggestion</h2>
                        <p className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest">Notebook Intelligence</p>

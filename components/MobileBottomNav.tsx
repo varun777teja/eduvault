@@ -60,8 +60,8 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             
             <header className="relative mb-6 text-center shrink-0">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center p-3 shadow-xl border border-white/10 ring-4 ring-indigo-500/10">
-                  <img src="https://i.ibb.co/TDvGjR3z/logoapp.png" alt="AI" className="w-full h-full object-contain" />
+                <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center p-3 shadow-xl border border-white/10 ring-4 ring-indigo-500/10 overflow-hidden">
+                  <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="Brahma AI" className="w-full h-full object-contain" />
                 </div>
               </div>
               <h2 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Vault AI</h2>
@@ -76,7 +76,7 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             </header>
 
             <div className="py-10 text-center opacity-20">
-               <Sparkles className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+               <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-8 h-8 mx-auto mb-2 grayscale" alt="" />
                <p className="text-[10px] font-black uppercase tracking-widest">Futures Hidden</p>
             </div>
           </div>
@@ -111,7 +111,11 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             className={`flex-1 flex flex-col items-center gap-0.5 p-2 transition-all duration-300 ${isAiModalOpen || isAiVault ? 'text-indigo-600' : 'text-slate-400'}`}
           >
             <div className={`p-1.5 rounded-xl transition-all ${isAiModalOpen || isAiVault ? 'bg-indigo-50 shadow-inner' : ''}`}>
-              <Sparkles className={`w-5 h-5 ${isAiModalOpen || isAiVault ? 'animate-pulse' : ''}`} />
+              <img 
+                src="https://i.ibb.co/6JbSBhjt/logobrahma.png" 
+                className={`w-5 h-5 object-contain ${isAiModalOpen || isAiVault ? 'animate-pulse' : 'grayscale opacity-60'}`} 
+                alt="AI" 
+              />
             </div>
           </button>
 

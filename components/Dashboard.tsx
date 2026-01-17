@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-4 lg:mb-6 gap-3">
             <div className="bg-white/10 backdrop-blur-md px-3 py-1 lg:px-4 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10">
-              <Sparkles className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-yellow-300 animate-pulse" />
+              <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-3.5 h-3.5 object-contain" alt="" />
               <span>EduVault Live</span>
             </div>
           </div>
@@ -82,7 +82,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
           {quickResult && (
              <div className="mt-6 lg:mt-8 p-6 lg:p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl lg:rounded-[2.5rem] animate-in zoom-in-95 duration-300 text-left mx-2">
                 <div className="flex items-center gap-2 mb-3 text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-indigo-400">
-                  <TrendingUp className="w-3 h-3" /> Assistant Insight
+                  <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-3 h-3 object-contain" alt="" /> Assistant Insight
                 </div>
                 <p className="text-sm lg:text-base font-medium leading-relaxed text-slate-200">{quickResult}</p>
                 <button onClick={() => setQuickResult(null)} className="mt-4 lg:mt-6 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors">Close Dialogue</button>
