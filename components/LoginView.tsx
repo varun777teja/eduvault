@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, Loader2, UserCheck, 
   Sparkles, GraduationCap, Hash, 
-  Layers, Check, ShieldCheck
+  Layers, Check, ShieldCheck,
+  Book, Brain, Star, Zap
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
 
@@ -48,7 +49,6 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const metadata = session.user.user_metadata;
-        // If profile isn't completed, trigger setup view
         if (!metadata.roll_number || !metadata.branch || !metadata.profile_completed) {
           setProfileData(prev => ({
             ...prev,
@@ -117,7 +117,6 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   if (isSettingUp) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Modern Background Effects */}
         <div className="absolute top-[-20%] left-[-10%] w-[50rem] h-[50rem] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[50rem] h-[50rem] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
         
@@ -203,16 +202,23 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[5%] left-[10%] w-[40rem] h-[40rem] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[5%] right-[10%] w-[35rem] h-[35rem] bg-purple-600/10 rounded-full blur-[150px] animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[60rem] h-[60rem] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse"></div>
+        <div className="absolute bottom-[-15%] right-[-5%] w-[55rem] h-[55rem] bg-purple-600/10 rounded-full blur-[160px] animate-pulse delay-1000"></div>
+        
+        {/* Floating Particle Icons */}
+        <Book className="absolute top-[20%] left-[15%] w-8 h-8 text-indigo-500/20 animate-float" style={{ animationDelay: '0s' }} />
+        <Brain className="absolute bottom-[25%] left-[20%] w-10 h-10 text-purple-500/20 animate-float" style={{ animationDelay: '1s' }} />
+        <Star className="absolute top-[30%] right-[18%] w-6 h-6 text-yellow-500/20 animate-float" style={{ animationDelay: '2s' }} />
+        <Zap className="absolute bottom-[20%] right-[22%] w-12 h-12 text-blue-500/20 animate-float" style={{ animationDelay: '0.5s' }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-lg text-center">
-        <div className="mb-16 animate-in fade-in slide-in-from-top-10 duration-1000">
-          <div className="w-28 h-28 bg-white rounded-[3rem] flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] mb-10 mx-auto group cursor-pointer hover:rotate-12 transition-transform overflow-hidden ring-4 ring-indigo-500/20 p-2">
+      <div className="relative z-10 w-full max-w-lg text-center flex flex-col items-center">
+        {/* Logo Section with Elastic Animation */}
+        <div className="mb-14 animate-in fade-in slide-in-from-top-12 duration-1000">
+          <div className="w-32 h-32 bg-white rounded-[3.5rem] flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.08)] mb-8 mx-auto group cursor-pointer hover:rotate-6 hover:scale-105 transition-all duration-500 overflow-hidden ring-[12px] ring-indigo-500/10 p-4 border border-white/20">
              <img 
                src="https://i.ibb.co/zhbHCxnh/logo.png" 
                alt="EduVault Logo" 
@@ -222,54 +228,77 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                }}
              />
           </div>
-          <h1 className="text-7xl font-black text-white tracking-tighter shimmer-text mb-4">EduVault</h1>
-          <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-[11px] flex items-center justify-center gap-3">
-            <span className="w-8 h-px bg-slate-800"></span>
-            The Student AI E-Library
-            <span className="w-8 h-px bg-slate-800"></span>
+          <h1 className="text-7xl font-black text-white tracking-tighter shimmer-text mb-4">
+            EduVault
+          </h1>
+          <p className="text-slate-500 font-bold uppercase tracking-[0.5em] text-[10px] flex items-center justify-center gap-4">
+            <span className="w-12 h-[1px] bg-gradient-to-r from-transparent to-slate-800"></span>
+            Intelligence Awaits
+            <span className="w-12 h-[1px] bg-gradient-to-l from-transparent to-slate-800"></span>
           </p>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[4rem] p-12 lg:p-16 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-700 delay-300">
-          <h2 className="text-3xl font-black text-white tracking-tight mb-4">Academic Access</h2>
-          <p className="text-slate-400 text-sm font-medium mb-12">Secure your documents with institutional-grade AI storage.</p>
+        {/* Login Card with Staggered Elements */}
+        <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/[0.08] rounded-[4.5rem] p-12 lg:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-700 delay-300">
+          <h2 className="text-3xl font-black text-white tracking-tight mb-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+            Vault Entry
+          </h2>
+          <p className="text-slate-400 text-sm font-medium mb-14 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
+            Secure your research with institutional-grade AI.
+          </p>
 
           {error && (
-            <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs font-bold">
+            <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs font-bold animate-in shake duration-500">
               {error}
             </div>
           )}
 
+          {/* Improved Google Button */}
           <button 
             onClick={handleGoogleLogin}
             disabled={isOAuthLoading}
-            className="w-full group relative flex items-center justify-center gap-5 px-10 py-7 bg-white rounded-[2.5rem] text-slate-900 hover:bg-slate-50 transition-all font-black text-xl shadow-[0_20px_40px_-10px_rgba(255,255,255,0.1)] active:scale-[0.98] disabled:opacity-50 overflow-hidden"
+            className="w-full group relative flex items-center justify-center gap-6 px-8 py-7 bg-white rounded-[2.5rem] text-slate-900 hover:bg-slate-50 transition-all duration-500 font-black text-xl shadow-[0_25px_50px_-12px_rgba(255,255,255,0.15)] active:scale-[0.97] disabled:opacity-50 overflow-hidden animate-in slide-in-from-bottom-8 duration-700 delay-700"
           >
-            <div className="absolute bottom-0 left-0 h-1.5 w-full flex">
-              <div className="flex-1 bg-[#4285F4]"></div><div className="flex-1 bg-[#EA4335]"></div><div className="flex-1 bg-[#FBBC05]"></div><div className="flex-1 bg-[#34A853]"></div>
+            {/* Shimmer Effect Overlay */}
+            {!isOAuthLoading && <div className="absolute inset-0 shimmer-btn opacity-30 pointer-events-none"></div>}
+            
+            <div className="absolute bottom-0 left-0 h-[3px] w-full flex">
+              <div className="flex-1 bg-[#4285F4]"></div>
+              <div className="flex-1 bg-[#EA4335]"></div>
+              <div className="flex-1 bg-[#FBBC05]"></div>
+              <div className="flex-1 bg-[#34A853]"></div>
             </div>
+
             {isOAuthLoading ? (
-              <Loader2 className="w-7 h-7 animate-spin text-indigo-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             ) : (
               <>
-                <div className="w-9 h-9 bg-white p-1.5 rounded-xl shadow-inner flex items-center justify-center group-hover:rotate-12 transition-transform border border-slate-100">
-                  <img src="https://www.google.com/favicon.ico" alt="" className="w-6 h-6" />
+                <div className="w-10 h-10 bg-white p-2 rounded-xl shadow-inner flex items-center justify-center group-hover:scale-110 group-hover:rotate-[15deg] transition-all duration-500 border border-slate-100">
+                  <img src="https://www.google.com/favicon.ico" alt="" className="w-full h-full" />
                 </div>
-                <span>Continue with Google</span>
+                <span className="relative z-10">Continue with Google</span>
               </>
             )}
           </button>
 
-          <div className="mt-12 flex items-center justify-center gap-6 opacity-40">
-             <div className="flex items-center gap-2 text-[9px] font-black text-white uppercase tracking-widest">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" /> Google Auth Secured
+          {/* Footer Icons Section */}
+          <div className="mt-14 flex items-center justify-center gap-8 opacity-40 animate-in fade-in duration-1000 delay-1000">
+             <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> 
+                End-to-End Auth
              </div>
              <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
-             <div className="flex items-center gap-2 text-[9px] font-black text-white uppercase tracking-widest">
-                <GraduationCap className="w-4 h-4 text-indigo-400" /> For Academic Use
+             <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
+                <GraduationCap className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" /> 
+                Academic Sandbox
              </div>
           </div>
         </div>
+
+        {/* Support Link */}
+        <p className="mt-10 text-slate-600 text-[10px] font-bold uppercase tracking-[0.2em] animate-in fade-in duration-1000 delay-1000">
+          Need access? <span className="text-slate-400 hover:text-white cursor-pointer transition-colors">Contact IT Support</span>
+        </p>
       </div>
     </div>
   );

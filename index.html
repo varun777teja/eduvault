@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>EduVault | Smart AI E-Library</title>
     <meta name="description" content="AI-powered academic vault for students">
     <link rel="icon" type="image/png" href="https://i.ibb.co/zhbHCxnh/logo.png">
@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-        // Safely ensure process.env exists without overwriting values injected by the environment
         window.process = window.process || { env: {} };
         window.process.env = window.process.env || {};
     </script>
@@ -19,6 +18,8 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -34,37 +35,6 @@
             background: #94a3b8;
         }
 
-        /* Custom Icon Animations */
-        @keyframes icon-wiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(10deg); }
-            75% { transform: rotate(-10deg); }
-        }
-        .animate-icon-wiggle:hover {
-            animation: icon-wiggle 0.3s ease-in-out infinite;
-        }
-
-        @keyframes icon-pulse-slow {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        .animate-icon-pulse {
-            animation: icon-pulse-slow 3s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shimmer-text {
-            background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #6366f1 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s linear infinite;
-        }
-
-        /* New Bottom Nav Animations */
         @keyframes elastic-pop {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
@@ -89,6 +59,30 @@
         .animate-bounce-subtle {
             animation: bounce-subtle 2s ease-in-out infinite;
         }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-btn {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Prevent scroll bleed on mobile overlays */
+        .no-scroll {
+            overflow: hidden !important;
+        }
     </style>
 <script type="importmap">
 {
@@ -106,7 +100,7 @@
 </script>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root" class="min-h-screen"></div>
     <script type="module" src="index.tsx"></script>
 </body>
 </html>

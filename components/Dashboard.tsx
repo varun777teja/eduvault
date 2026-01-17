@@ -5,7 +5,7 @@ import {
   Globe, Cpu, BookOpen, GraduationCap, 
   ChevronRight, ArrowUpRight, Clock,
   TrendingUp, Newspaper, Cloud, CloudOff,
-  Loader2
+  Loader2, Search
 } from 'lucide-react';
 import { chatWithAI } from '../services/geminiService';
 import { isSupabaseConfigured } from '../services/supabase';
@@ -41,50 +41,51 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
   ];
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700 pb-20">
-      <div className="relative overflow-hidden bg-slate-900 rounded-[3.5rem] p-8 lg:p-16 text-white shadow-2xl border border-white/5">
+    <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-top-4 duration-700 pb-20">
+      {/* Hero Section - Optimized for Mobile */}
+      <div className="relative overflow-hidden bg-slate-900 rounded-[2rem] lg:rounded-[3.5rem] p-6 lg:p-16 text-white shadow-2xl border border-white/5 mx-2 lg:mx-0">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="flex justify-center mb-6 gap-3">
-            <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
+          <div className="flex justify-center mb-4 lg:mb-6 gap-3">
+            <div className="bg-white/10 backdrop-blur-md px-3 py-1 lg:px-4 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10">
+              <Sparkles className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-yellow-300 animate-pulse" />
               <span>EduVault Live</span>
             </div>
           </div>
           
-          <h1 className="text-4xl lg:text-6xl font-black mb-8 tracking-tight leading-tight">
+          <h1 className="text-3xl lg:text-6xl font-black mb-6 lg:mb-8 tracking-tight leading-tight px-2">
             Knowledge, in <span className="text-indigo-400">sync</span>.
           </h1>
 
           <form onSubmit={handleQuickAsk} className="relative group/ask max-w-xl mx-auto">
             <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-3xl opacity-0 group-focus-within/ask:opacity-100 transition-all"></div>
             <div className="relative flex items-center">
-              <div className="absolute left-5 w-7 h-7 flex items-center justify-center opacity-60 group-focus-within/ask:opacity-100 transition-opacity">
-                <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI Logo" className="w-full h-full object-contain" />
+              <div className="absolute left-5 lg:left-6 w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center opacity-40 group-focus-within/ask:opacity-100 transition-opacity">
+                <Search className="w-full h-full text-slate-300" />
               </div>
               <input 
                 type="text" 
                 value={quickQuery}
                 onChange={e => setQuickQuery(e.target.value)}
-                placeholder="Ask your academic assistant..." 
-                className="w-full pl-14 pr-16 py-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] text-lg font-medium placeholder:text-slate-500 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all"
+                placeholder="Ask anything..." 
+                className="w-full pl-12 lg:pl-16 pr-14 lg:pr-16 py-5 lg:py-7 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl lg:rounded-[2.5rem] text-sm lg:text-lg font-medium placeholder:text-slate-500 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all"
               />
               <button 
                 type="submit"
                 disabled={isQuickLoading || !quickQuery.trim()}
-                className="absolute right-3 p-3.5 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-500 transition-all active:scale-90 disabled:opacity-50"
+                className="absolute right-2.5 lg:right-3 p-2.5 lg:p-3.5 bg-indigo-600 text-white rounded-xl lg:rounded-2xl shadow-xl hover:bg-indigo-500 transition-all active:scale-90 disabled:opacity-50"
               >
-                {isQuickLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
+                {isQuickLoading ? <Loader2 className="w-5 h-5 lg:w-6 lg:h-6 animate-spin" /> : <Send className="w-5 h-5 lg:w-6 lg:h-6" />}
               </button>
             </div>
           </form>
 
           {quickResult && (
-             <div className="mt-8 p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] animate-in zoom-in-95 duration-300 text-left">
-                <div className="flex items-center gap-2 mb-3 text-[10px] font-black uppercase tracking-widest text-indigo-400">
+             <div className="mt-6 lg:mt-8 p-6 lg:p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl lg:rounded-[2.5rem] animate-in zoom-in-95 duration-300 text-left mx-2">
+                <div className="flex items-center gap-2 mb-3 text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-indigo-400">
                   <TrendingUp className="w-3 h-3" /> Assistant Insight
                 </div>
-                <p className="text-base font-medium leading-relaxed text-slate-200">{quickResult}</p>
-                <button onClick={() => setQuickResult(null)} className="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors">Close Dialogue</button>
+                <p className="text-sm lg:text-base font-medium leading-relaxed text-slate-200">{quickResult}</p>
+                <button onClick={() => setQuickResult(null)} className="mt-4 lg:mt-6 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors">Close Dialogue</button>
              </div>
           )}
         </div>
@@ -92,67 +93,59 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-600/20 rounded-full blur-[140px] translate-x-1/2 translate-y-1/2"></div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-2 lg:px-0">
         <div className="lg:col-span-8 space-y-8">
           <section>
-            <div className="flex items-center justify-between mb-6 px-2">
+            <div className="flex items-center justify-between mb-4 lg:mb-6 px-2">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                  <BookOpen className="w-6 h-6 text-indigo-600" />
+                <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2 lg:gap-3">
+                  <BookOpen className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
                   Live Vault History
                 </h2>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Library Feed</p>
+                <p className="text-[9px] lg:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Library Feed</p>
               </div>
             </div>
             
-            <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
+            <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-6 no-scrollbar -mx-2 px-4 lg:px-2">
               {documents.length > 0 ? documents.slice(0, 6).map((doc) => (
-                <div key={doc.id} className="flex-none w-48 group cursor-pointer animate-in fade-in slide-in-from-right-4 duration-500">
-                  <div className="aspect-[3/4] rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 mb-4 group-hover:-translate-y-2 transition-transform duration-500">
+                <div key={doc.id} className="flex-none w-40 lg:w-48 group cursor-pointer animate-in fade-in slide-in-from-right-4 duration-500">
+                  <div className="aspect-[3/4] rounded-[1.5rem] lg:rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 mb-3 lg:mb-4 group-hover:-translate-y-2 transition-transform duration-500">
                     <img src={doc.coverUrl} alt={doc.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                   </div>
-                  <h4 className="font-bold text-slate-900 text-sm line-clamp-1">{doc.title}</h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc.category}</p>
+                  <h4 className="font-bold text-slate-900 text-xs lg:text-sm line-clamp-1">{doc.title}</h4>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{doc.category}</p>
                 </div>
               )) : (
-                <div className="w-full py-16 text-center bg-white border border-dashed border-slate-200 rounded-[3rem]">
-                   <img 
-                    src="https://i.ibb.co/zhbHCxnh/logo.png" 
-                    className="w-12 h-12 opacity-20 mx-auto mb-4 grayscale" 
-                    alt="Empty Vault"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                   />
-                   <BookOpen className="w-8 h-8 text-slate-200 mx-auto mb-4" />
-                   <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No Documents Synced</p>
+                <div className="w-full py-12 lg:py-16 text-center bg-white border border-dashed border-slate-200 rounded-[2rem] lg:rounded-[3rem]">
+                   <BookOpen className="w-6 h-6 lg:w-8 lg:h-8 text-slate-200 mx-auto mb-3 lg:mb-4" />
+                   <p className="text-[9px] lg:text-xs font-black text-slate-300 uppercase tracking-widest">No Documents Synced</p>
                 </div>
               )}
             </div>
           </section>
 
           <section>
-            <div className="flex items-center justify-between mb-6 px-2">
+            <div className="flex items-center justify-between mb-4 lg:mb-6 px-2">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                  <Briefcase className="w-6 h-6 text-indigo-600" />
-                  Career Opportunities
+                <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2 lg:gap-3">
+                  <Briefcase className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
+                  Career Ops
                 </h2>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {jobUpdates.map((job, idx) => (
-                <div key={idx} className="group p-6 bg-white border border-slate-200 rounded-[2.5rem] hover:shadow-2xl transition-all duration-500">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={`w-14 h-14 ${job.bg} ${job.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <job.icon className="w-7 h-7" />
+                <div key={idx} className="group p-5 lg:p-6 bg-white border border-slate-200 rounded-[2rem] lg:rounded-[2.5rem] hover:shadow-2xl transition-all duration-500">
+                  <div className="flex items-start justify-between mb-4 lg:mb-6">
+                    <div className={`w-12 h-12 lg:w-14 lg:h-14 ${job.bg} ${job.color} rounded-xl lg:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <job.icon className="w-6 h-6 lg:w-7 lg:h-7" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">{job.title}</h3>
-                  <p className="text-sm font-medium text-slate-500 mt-1">{job.company}</p>
-                  <button className="mt-6 w-full py-3 bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white text-slate-900 text-xs font-black rounded-2xl transition-all flex items-center justify-center gap-2">
-                    Inquire <ArrowUpRight className="w-4 h-4" />
+                  <h3 className="text-lg lg:text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">{job.title}</h3>
+                  <p className="text-xs lg:text-sm font-medium text-slate-500 mt-1">{job.company}</p>
+                  <button className="mt-5 lg:mt-6 w-full py-3 bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white text-slate-900 text-[10px] lg:text-xs font-black rounded-xl lg:rounded-2xl transition-all flex items-center justify-center gap-2">
+                    Inquire <ArrowUpRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
@@ -160,13 +153,13 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
           </section>
         </div>
 
-        <div className="lg:col-span-4 space-y-8">
-           <section className="bg-white border border-slate-200 rounded-[3rem] p-8 shadow-sm">
-              <div className="flex items-center gap-3 mb-8">
-                 <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center">
-                    <Newspaper className="w-6 h-6 text-indigo-600" />
+        <div className="lg:col-span-4 space-y-6 lg:space-y-8">
+           <section className="bg-white border border-slate-200 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 lg:mb-8">
+                 <div className="w-10 h-10 lg:w-12 lg:h-12 bg-indigo-50 rounded-xl lg:rounded-2xl flex items-center justify-center">
+                    <Newspaper className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
                  </div>
-                 <h2 className="text-xl font-black text-slate-900 tracking-tight">Intelligence</h2>
+                 <h2 className="text-lg lg:text-xl font-black text-slate-900 tracking-tight">Intelligence</h2>
               </div>
               <div className="space-y-6">
                  {[
@@ -174,9 +167,9 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
                    { title: "AI regulation updates for 2025", time: "4h ago" }
                  ].map((n, i) => (
                    <div key={i} className="group cursor-pointer">
-                      <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-1">{n.time}</p>
-                      <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm">{n.title}</h3>
-                      <div className="h-px bg-slate-50 w-full mt-6"></div>
+                      <p className="text-[8px] lg:text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-1">{n.time}</p>
+                      <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-xs lg:text-sm">{n.title}</h3>
+                      <div className="h-px bg-slate-50 w-full mt-5 lg:mt-6"></div>
                    </div>
                  ))}
               </div>
