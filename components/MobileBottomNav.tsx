@@ -61,7 +61,7 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             <header className="relative mb-6 text-center shrink-0">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center p-3 shadow-xl border border-white/10 ring-4 ring-indigo-500/10">
-                  <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="AI" className="w-full h-full object-contain" />
+                  <img src="https://i.ibb.co/TDvGjR3z/logoapp.png" alt="AI" className="w-full h-full object-contain" />
                 </div>
               </div>
               <h2 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Vault AI</h2>

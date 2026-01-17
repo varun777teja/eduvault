@@ -220,7 +220,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         <div className="mb-14 animate-in fade-in slide-in-from-top-12 duration-1000">
           <div className="w-32 h-32 bg-white rounded-[3.5rem] flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.08)] mb-8 mx-auto group cursor-pointer hover:rotate-6 hover:scale-105 transition-all duration-500 overflow-hidden ring-[12px] ring-indigo-500/10 p-4 border border-white/20">
              <img 
-               src="https://i.ibb.co/zhbHCxnh/logo.png" 
+               src="https://i.ibb.co/TDvGjR3z/logoapp.png" 
                alt="EduVault Logo" 
                className="w-full h-full object-contain"
                onError={(e) => {
