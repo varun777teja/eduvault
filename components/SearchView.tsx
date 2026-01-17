@@ -44,7 +44,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
     }
   }, [searchTerm]);
 
-  // AI Spotlight Trigger: If search term is a concept
+  // AI Spotlight Trigger
   useEffect(() => {
     const fetchAiSpotlight = async () => {
       if (searchTerm.length < 4 || activeTab === 'chat') {
@@ -53,7 +53,6 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
       setIsAiLoading(true);
       try {
         const res = await chatWithAI(`Provide a very concise (max 2 sentences) overview or definition for: ${searchTerm}`);
-        // Fix: Assign res.text to string state
         setAiInsight(res.text);
       } catch (err) {
         setAiInsight(null);
@@ -108,12 +107,10 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
     setIsChatLoading(true);
 
     try {
-      // Use general AI chat for the search page
       const response = await chatWithAI(`Regarding the search topic "${searchTerm}": ${userMsg.text}`);
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        // Fix: Use response.text string instead of the whole result object
         text: response.text,
         timestamp: new Date()
       };
@@ -132,7 +129,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
 
   return (
     <div className="max-w-6xl mx-auto p-4 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32">
-      {/* Search Header (Mobile Only, Desktop uses Navbar) */}
+      {/* Search Header (Mobile Only) */}
       <div className="lg:hidden mb-8">
         <div className="relative group">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -193,7 +190,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
           <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-slate-100">
             {[
               { id: 'all', label: 'All Results', icon: Filter },
-              { id: 'chat', label: 'AI Conversation', icon: MessageSquare },
+              { id: 'chat', label: 'AI Conversation', icon: 'image' },
               { id: 'docs', label: 'Vault Documents', icon: FileText },
               { id: 'careers', label: 'Opportunities', icon: Briefcase }
             ].map(tab => (
@@ -206,20 +203,24 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                     : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
               >
-                <tab.icon className="w-3.5 h-3.5" />
+                {tab.icon === 'image' ? (
+                   <div className="w-4 h-4">
+                     <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="" className="w-full h-full object-contain" />
+                   </div>
+                ) : <tab.icon className="w-3.5 h-3.5" />}
                 {tab.label}
               </button>
             ))}
           </div>
 
-          {/* AI Spotlight Section (Visible in 'all' tab) */}
+          {/* AI Spotlight Section */}
           {activeTab === 'all' && (
             <section className="animate-in fade-in zoom-in-95 duration-500">
               <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl border border-white/20 animate-icon-pulse">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="w-8 h-8 p-1.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/20 animate-icon-pulse flex items-center justify-center">
+                      <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain brightness-0 invert" />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">AI Quick Answer</span>
                   </div>
@@ -244,25 +245,21 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                       </div>
                     </div>
                   ) : (
-                    <p className="text-lg opacity-60">Searching for AI definitions... Type a concept like "Neural Networks".</p>
+                    <p className="text-lg opacity-60">Searching for AI definitions...</p>
                   )}
                 </div>
-                {/* Decorative background orbs */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
               </div>
             </section>
           )}
 
-          {/* Main Content Area */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 min-h-[500px]">
-            
-            {/* Dedicated Chat Interface */}
             {activeTab === 'chat' && (
               <div className="lg:col-span-12 bg-white border border-slate-200 rounded-[3rem] shadow-sm flex flex-col overflow-hidden h-[600px] animate-in slide-in-from-right-4">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                      <BrainCircuit className="w-6 h-6" />
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center p-2 text-white shadow-lg">
+                      <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain brightness-0 invert" />
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Socratic Assistant</h3>
@@ -274,8 +271,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
                   {chatMessages.length === 0 && !isChatLoading && (
                     <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                       <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-4 animate-bounce-subtle">
-                         <Sparkles className="w-8 h-8" />
+                       <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 animate-bounce-subtle p-3">
+                         <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain" />
                        </div>
                        <h4 className="text-lg font-black text-slate-900">Ask the Academic Assistant</h4>
                        <p className="text-sm text-slate-500 max-w-xs mt-2">I'm here to help you understand "{searchTerm}" in-depth. What would you like to know?</p>
@@ -285,8 +282,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                   {chatMessages.map((msg, i) => (
                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
                       <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                         <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-900 text-white'}`}>
-                           {msg.role === 'user' ? <User className="w-4 h-4" /> : <BrainCircuit className="w-4 h-4" />}
+                         <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center overflow-hidden ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-900 text-white p-1.5'}`}>
+                           {msg.role === 'user' ? <User className="w-4 h-4" /> : <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-full h-full object-contain brightness-0 invert" />}
                          </div>
                          <div className={`p-4 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
                            msg.role === 'user' 
@@ -301,8 +298,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                   {isChatLoading && (
                     <div className="flex justify-start">
                       <div className="flex gap-3 max-w-[80%]">
-                         <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                           <BrainCircuit className="w-4 h-4" />
+                         <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center p-1.5">
+                           <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-full h-full object-contain brightness-0 invert" />
                          </div>
                          <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-none flex items-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
@@ -335,7 +332,6 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
               </div>
             )}
 
-            {/* Documents Section */}
             {(activeTab === 'all' || activeTab === 'docs') && (
               <div className="lg:col-span-8 space-y-6">
                 <div className="flex items-center justify-between px-2">
@@ -377,7 +373,6 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
               </div>
             )}
 
-            {/* Sidebar Results (Careers/Opportunities) */}
             {(activeTab === 'all' || activeTab === 'careers') && (
               <div className="lg:col-span-4 space-y-8">
                 <section>

@@ -15,7 +15,8 @@ import {
   BarChart3,
   Sparkles,
   CalendarDays,
-  User
+  User,
+  ShieldCheck
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -30,7 +31,7 @@ const Sidebar: React.FC = () => {
   ];
 
   const aiTools = [
-    { label: 'AI Tutor', icon: BrainCircuit, to: '/ai-tutor', color: 'text-indigo-500' },
+    { label: 'AI Vault', icon: 'image', to: '/ai-vault', color: 'text-indigo-500', isBranded: true },
     { label: 'Summarizer', icon: Zap, to: '/summarizer', color: 'text-amber-500' },
     { label: 'Flashcards', icon: Layers, to: '/flashcards', color: 'text-emerald-500' },
   ];
@@ -103,7 +104,11 @@ const Sidebar: React.FC = () => {
                 }
               >
                 <div className={`w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${tool.color}`}>
-                   <tool.icon className="w-4 h-4" />
+                   {typeof tool.icon === 'string' ? (
+                     <img src="https://i.ibb.co/TBWnWGyv/image.png" className="w-5 h-5 object-contain" alt="AI Icon" />
+                   ) : (
+                     <tool.icon className="w-4 h-4" />
+                   )}
                 </div>
                 <span>{tool.label}</span>
               </NavLink>

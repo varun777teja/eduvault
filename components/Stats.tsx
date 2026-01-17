@@ -12,22 +12,25 @@ import { Document, Task } from '../types';
 
 interface StatsProps {
   documents: Document[];
+  // Fix: Added tasks prop to fix the type mismatch in App.tsx
+  tasks: Task[];
 }
 
-const Stats: React.FC<StatsProps> = ({ documents }) => {
+const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
   const navigate = useNavigate();
   const [sessionStats, setSessionStats] = useState({ minutes: 0, ai_hits: 0 });
   const [readHistory, setReadHistory] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
+
+  // Fix: Removed local tasks state as it is now provided via props from App.tsx
+  // which handles synchronization with Supabase/LocalStorage.
 
   useEffect(() => {
     const loadData = () => {
       const savedStats = JSON.parse(localStorage.getItem('eduvault_stats') || '{"minutes":45, "ai_hits":12}');
       const savedHistory = JSON.parse(localStorage.getItem('eduvault_history') || '[]');
-      const savedTasks = JSON.parse(localStorage.getItem('eduvault_tasks') || '[]');
+      // Fix: we no longer need to load tasks locally here
       setSessionStats(savedStats);
       setReadHistory(savedHistory);
-      setTasks(savedTasks);
     };
     
     loadData();

@@ -14,6 +14,7 @@ import LibraryViewComponent from './components/LibraryView.tsx';
 import ProfileView from './components/ProfileView.tsx';
 import LoginView from './components/LoginView.tsx';
 import NotificationSystem from './components/NotificationSystem.tsx';
+import AIPage from './components/AIPage.tsx';
 import { Document, AppNotification, Task } from './types.ts';
 import { soundService } from './services/soundService.ts';
 import { supabase, isSupabaseConfigured } from './services/supabase.ts';
@@ -76,7 +77,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Fetch initial data and setup REAL-TIME SUBSCRIPTIONS
+  // Fetch initial data
   useEffect(() => {
     if (!session) return;
 
@@ -88,7 +89,6 @@ const App: React.FC = () => {
     } else {
       fetchInitialData();
       
-      // REAL-TIME DOCUMENTS SUBSCRIPTION
       const docChannel = supabase
         .channel('realtime_documents')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, (payload) => {
@@ -105,7 +105,6 @@ const App: React.FC = () => {
         })
         .subscribe();
 
-      // REAL-TIME TASKS SUBSCRIPTION
       const taskChannel = supabase
         .channel('realtime_tasks')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, (payload) => {
@@ -245,6 +244,7 @@ const App: React.FC = () => {
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
               <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={removeDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
+              <Route path="/ai-vault" element={<AIPage documents={documents} />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/stats" element={<Stats documents={documents} tasks={tasks} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} initialTasks={tasks} />} />

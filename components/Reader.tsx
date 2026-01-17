@@ -124,7 +124,10 @@ const Reader: React.FC<ReaderProps> = ({ documents }) => {
               {isFocusMode ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </button>
             <button onClick={explainSelection} className="hidden md:flex px-5 py-2.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-indigo-700 transition-all items-center gap-2 shadow-xl active:scale-95">
-              <Sparkles className="w-4 h-4" /> Ask AI Tutor
+              <div className="w-4 h-4">
+                <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="" className="w-full h-full object-contain brightness-0 invert" />
+              </div>
+              Ask AI Tutor
             </button>
             {!isSidebarOpen && (
               <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-all">
@@ -175,8 +178,8 @@ const Reader: React.FC<ReaderProps> = ({ documents }) => {
               <div className="space-y-6">
                 {chatMessages.length === 0 && (
                   <div className="text-center py-16 px-6 animate-in fade-in zoom-in duration-700">
-                    <div className="w-20 h-20 bg-white border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl animate-icon-pulse">
-                      <BrainOpenIcon className="w-10 h-10 text-indigo-500" />
+                    <div className="w-20 h-20 bg-white border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl animate-icon-pulse overflow-hidden p-4">
+                      <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI Assistant" className="w-full h-full object-contain" />
                     </div>
                     <h3 className="text-lg font-black text-slate-900">Academic Intelligence</h3>
                     <p className="text-xs text-slate-400 mt-3 leading-relaxed font-medium">
@@ -222,14 +225,15 @@ const Reader: React.FC<ReaderProps> = ({ documents }) => {
               </div>
             )}
 
-            {/* Other panels (lab/info) remain identical to previous implementation for brevity */}
             {activeSidePanel === 'lab' && (
               <div className="space-y-6">
                 <button 
-                  onClick={() => {/* existing logic */}} 
+                  onClick={() => {}} 
                   className="w-full py-10 bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group"
                 >
-                  <Sparkles className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                  <div className="w-10 h-10 mb-2">
+                    <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI Lab" className="w-full h-full object-contain opacity-40 group-hover:opacity-100 transition-opacity" />
+                  </div>
                   <span className="text-xs font-black uppercase tracking-widest">Generate Mastery Quiz</span>
                 </button>
               </div>
@@ -261,12 +265,5 @@ const Reader: React.FC<ReaderProps> = ({ documents }) => {
     </div>
   );
 };
-
-// Helper SVG Icon component
-const BrainOpenIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 4.5V2" /><path d="m18 8.5 2-2" /><path d="M20 15.5h2" /><path d="m19 20.5-2-2" /><path d="m5 20.5 2-2" /><path d="M2 15.5h2" /><path d="m4 8.5 2-2" /><path d="M8 13a4 4 0 1 1 8 0" /><path d="M18 13a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4" />
-  </svg>
-);
 
 export default Reader;

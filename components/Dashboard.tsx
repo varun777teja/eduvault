@@ -58,7 +58,9 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
           <form onSubmit={handleQuickAsk} className="relative group/ask max-w-xl mx-auto">
             <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-3xl opacity-0 group-focus-within/ask:opacity-100 transition-all"></div>
             <div className="relative flex items-center">
-              <BrainCircuit className="absolute left-5 w-6 h-6 text-slate-400 group-focus-within/ask:text-indigo-400 transition-colors" />
+              <div className="absolute left-5 w-7 h-7 flex items-center justify-center opacity-60 group-focus-within/ask:opacity-100 transition-opacity">
+                <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI Logo" className="w-full h-full object-contain" />
+              </div>
               <input 
                 type="text" 
                 value={quickQuery}
@@ -71,7 +73,6 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
                 disabled={isQuickLoading || !quickQuery.trim()}
                 className="absolute right-3 p-3.5 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-500 transition-all active:scale-90 disabled:opacity-50"
               >
-                {/* Loader2 fixed by import */}
                 {isQuickLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
               </button>
             </div>

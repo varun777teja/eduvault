@@ -20,7 +20,6 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
     setAiResponse(null);
     try {
       const result = await chatWithAI(aiQuery);
-      // Fix: Assign result.text string to state
       setAiResponse(result.text || "I couldn't find an answer for that.");
     } catch (err) {
       setAiResponse("Sorry, there was an error processing your request.");
@@ -83,9 +82,15 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             {/* The Button */}
             <button 
               onClick={() => { setIsAiModalOpen(!isAiModalOpen); setIsSearchOpen(false); }}
-              className={`relative w-16 h-16 bg-gradient-to-tr from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl shadow-2xl shadow-indigo-300/50 flex items-center justify-center text-white transition-all duration-500 active:scale-90 hover:scale-105 hover:-translate-y-1 ${isAiModalOpen ? 'rotate-[135deg] rounded-[2rem]' : 'animate-bounce-subtle'}`}
+              className={`relative w-16 h-16 bg-gradient-to-tr from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl shadow-2xl shadow-indigo-300/50 flex items-center justify-center text-white transition-all duration-500 active:scale-90 hover:scale-105 hover:-translate-y-1 ${isAiModalOpen ? 'rotate-[135deg] rounded-[2rem]' : 'animate-bounce-subtle'} overflow-hidden`}
             >
-              {isAiModalOpen ? <X className="w-8 h-8 -rotate-[135deg]" /> : <Sparkles className="w-8 h-8" />}
+              {isAiModalOpen ? (
+                <X className="w-8 h-8 -rotate-[135deg]" />
+              ) : (
+                <div className="w-9 h-9">
+                   <img src="https://i.ibb.co/TBWnWGyv/image.png" alt="AI" className="w-full h-full object-contain brightness-0 invert" />
+                </div>
+              )}
               {!isAiModalOpen && (
                 <div className="absolute inset-0 rounded-3xl border-2 border-white/30 animate-aura pointer-events-none"></div>
               )}
