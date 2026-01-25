@@ -149,6 +149,16 @@ const INITIAL_DOCS: Document[] = [
     content: 'Unit 1 study material for ES.',
     coverUrl: 'https://picsum.photos/seed/esmat/300/400',
     fileUrl: '/books/Unit -1 - ES Material-1.pdf'
+  },
+  {
+    id: '14',
+    title: 'Digital Communication Systems',
+    author: 'Sanjay Sharma',
+    category: 'Engineering',
+    uploadDate: '2024-02-02',
+    content: 'In-depth guide to digital communication systems.',
+    coverUrl: 'https://picsum.photos/seed/digicomm/300/400',
+    fileUrl: '/books/pdfcoffee.com_digital-communication-system-by-sanjay-sharma-pdf-free.pdf'
   }
 ];
 
@@ -218,7 +228,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!session) return;
     if (isLocalMode) {
-      const savedDocs = localStorage.getItem('eduvault_docs_v3');
+      const savedDocs = localStorage.getItem('eduvault_docs_v4');
       const savedTasks = localStorage.getItem('eduvault_tasks');
       setDocuments(savedDocs ? JSON.parse(savedDocs) : INITIAL_DOCS);
       setTasks(savedTasks ? JSON.parse(savedTasks) : []);
@@ -246,7 +256,7 @@ const App: React.FC = () => {
       if (isLocalMode) {
         const updated = documents.filter(d => d.id !== id);
         setDocuments(updated);
-        localStorage.setItem('eduvault_docs_v3', JSON.stringify(updated));
+        localStorage.setItem('eduvault_docs_v4', JSON.stringify(updated));
       } else {
         const { error } = await supabase.from('documents').delete().eq('id', id);
         if (error) throw error;
