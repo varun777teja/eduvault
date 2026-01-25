@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ArrowRight, Loader2, UserCheck, 
-  Sparkles, GraduationCap, Hash, 
+import {
+  ArrowRight, Loader2, UserCheck,
+  Sparkles, GraduationCap, Hash,
   Layers, Check, ShieldCheck,
   Book, Brain, Star, Zap
 } from 'lucide-react';
@@ -16,7 +16,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isSettingUp, setIsSettingUp] = useState(false);
-  
+
   // Profile Setup State
   const [profileData, setProfileData] = useState({
     name: '',
@@ -45,7 +45,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   useEffect(() => {
     const checkSession = async () => {
       if (!isSupabaseConfigured) return;
-      
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const metadata = session.user.user_metadata;
@@ -119,7 +119,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[50rem] h-[50rem] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[50rem] h-[50rem] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        
+
         <div className="relative z-10 w-full max-w-xl bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[4rem] p-10 lg:p-16 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-500">
           <div className="text-center mb-12">
             <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-indigo-400 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-indigo-500/40 relative">
@@ -144,11 +144,11 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Full Name</label>
                 <div className="relative group">
                   <UserCheck className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     value={profileData.name}
-                    onChange={e => setProfileData({...profileData, name: e.target.value})}
+                    onChange={e => setProfileData({ ...profileData, name: e.target.value })}
                     placeholder="e.g. Alex Johnson"
                     className="w-full pl-16 pr-6 py-5 bg-white/[0.05] border border-white/10 rounded-[2rem] text-white font-bold outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all placeholder:text-slate-700"
                   />
@@ -159,11 +159,11 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Roll Number</label>
                 <div className="relative group">
                   <Hash className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     value={profileData.rollNumber}
-                    onChange={e => setProfileData({...profileData, rollNumber: e.target.value})}
+                    onChange={e => setProfileData({ ...profileData, rollNumber: e.target.value })}
                     placeholder="e.g. 24CSE001"
                     className="w-full pl-16 pr-6 py-5 bg-white/[0.05] border border-white/10 rounded-[2rem] text-white font-bold outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all placeholder:text-slate-700"
                   />
@@ -174,10 +174,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Academic Branch</label>
                 <div className="relative group">
                   <Layers className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
-                  <select 
+                  <select
                     required
                     value={profileData.branch}
-                    onChange={e => setProfileData({...profileData, branch: e.target.value})}
+                    onChange={e => setProfileData({ ...profileData, branch: e.target.value })}
                     className="w-full pl-16 pr-6 py-5 bg-white/[0.05] border border-white/10 rounded-[2rem] text-white font-bold outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all appearance-none cursor-pointer"
                   >
                     {engineeringBranches.map(branch => (
@@ -188,7 +188,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={isOAuthLoading}
               className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
@@ -207,7 +207,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-5%] w-[60rem] h-[60rem] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse"></div>
         <div className="absolute bottom-[-15%] right-[-5%] w-[55rem] h-[55rem] bg-purple-600/10 rounded-full blur-[160px] animate-pulse delay-1000"></div>
-        
+
         {/* Floating Particle Icons */}
         <Book className="absolute top-[20%] left-[15%] w-8 h-8 text-indigo-500/20 animate-float" style={{ animationDelay: '0s' }} />
         <Brain className="absolute bottom-[25%] left-[20%] w-10 h-10 text-purple-500/20 animate-float" style={{ animationDelay: '1s' }} />
@@ -219,17 +219,17 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         {/* Logo Section with Elastic Animation */}
         <div className="mb-14 animate-in fade-in slide-in-from-top-12 duration-1000">
           <div className="w-32 h-32 bg-white rounded-[3.5rem] flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.08)] mb-8 mx-auto group cursor-pointer hover:rotate-6 hover:scale-105 transition-all duration-500 overflow-hidden ring-[12px] ring-indigo-500/10 p-4 border border-white/20">
-             <img 
-               src="https://i.ibb.co/zhbHCxnh/logo.png" 
-               alt="EduVault Logo" 
-               className="w-full h-full object-contain"
-               onError={(e) => {
-                 e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/3413/3413535.png";
-               }}
-             />
+            <img
+              src="https://i.ibb.co/zhbHCxnh/logo.png"
+              alt="EduVault Logo"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/3413/3413535.png";
+              }}
+            />
           </div>
           <h1 className="text-7xl font-black text-white tracking-tighter shimmer-text mb-4">
-            EduVault
+            AI EduVault
           </h1>
           <p className="text-slate-500 font-bold uppercase tracking-[0.5em] text-[10px] flex items-center justify-center gap-4">
             <span className="w-12 h-[1px] bg-gradient-to-r from-transparent to-slate-800"></span>
@@ -254,14 +254,14 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
           )}
 
           {/* Improved Google Button */}
-          <button 
+          <button
             onClick={handleGoogleLogin}
             disabled={isOAuthLoading}
             className="w-full group relative flex items-center justify-center gap-6 px-8 py-7 bg-white rounded-[2.5rem] text-slate-900 hover:bg-slate-50 transition-all duration-500 font-black text-xl shadow-[0_25px_50px_-12px_rgba(255,255,255,0.15)] active:scale-[0.97] disabled:opacity-50 overflow-hidden animate-in slide-in-from-bottom-8 duration-700 delay-700"
           >
             {/* Shimmer Effect Overlay */}
             {!isOAuthLoading && <div className="absolute inset-0 shimmer-btn opacity-30 pointer-events-none"></div>}
-            
+
             <div className="absolute bottom-0 left-0 h-[3px] w-full flex">
               <div className="flex-1 bg-[#4285F4]"></div>
               <div className="flex-1 bg-[#EA4335]"></div>
@@ -283,15 +283,15 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
 
           {/* Footer Icons Section */}
           <div className="mt-14 flex items-center justify-center gap-8 opacity-40 animate-in fade-in duration-1000 delay-1000">
-             <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> 
-                End-to-End Auth
-             </div>
-             <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
-             <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
-                <GraduationCap className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" /> 
-                Academic Sandbox
-             </div>
+            <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              End-to-End Auth
+            </div>
+            <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
+            <div className="flex items-center gap-2.5 text-[9px] font-black text-white uppercase tracking-widest group cursor-help">
+              <GraduationCap className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+              Academic Sandbox
+            </div>
           </div>
         </div>
 

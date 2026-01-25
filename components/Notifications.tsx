@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
-import { 
-  Bell, Sparkles, CheckCircle2, Clock, Trash2, 
-  ArrowLeft, Info, Eye, EyeOff, Filter, 
+import {
+  Bell, Sparkles, CheckCircle2, Clock, Trash2,
+  ArrowLeft, Info, Eye, EyeOff, Filter,
   Search, Settings, BookOpen, AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -55,7 +55,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     id: '5',
     type: 'info',
     title: 'Feature Update',
-    description: 'EduVault AI now supports streaming chat for faster responses.',
+    description: 'AI EduVault now supports streaming chat for faster responses.',
     time: '1 day ago',
     read: true,
   }
@@ -106,7 +106,7 @@ const Notifications: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="p-2.5 hover:bg-white rounded-2xl shadow-sm border border-slate-200 text-slate-500 transition-all hover:scale-110 active:scale-90"
           >
@@ -124,14 +124,14 @@ const Notifications: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={markAllAsRead}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm active:scale-95"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             Mark Read
           </button>
-          <button 
+          <button
             onClick={clearAll}
             className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
             title="Clear All"
@@ -146,19 +146,19 @@ const Notifications: React.FC = () => {
 
       {/* Filters Bar */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
-        <button 
+        <button
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${filter === 'all' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}
         >
           All Activity
         </button>
-        <button 
+        <button
           onClick={() => setFilter('unread')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${filter === 'unread' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}
         >
           Unread
         </button>
-        <button 
+        <button
           onClick={() => setFilter('ai')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filter === 'ai' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}
         >
@@ -173,16 +173,15 @@ const Notifications: React.FC = () => {
           filteredNotifs.map((notif) => {
             const style = getIcon(notif.type);
             return (
-              <div 
+              <div
                 key={notif.id}
-                className={`group p-5 bg-white border rounded-2xl shadow-sm hover:shadow-md transition-all flex items-start gap-4 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 ${
-                  !notif.read ? 'border-l-4 border-l-indigo-500 ring-1 ring-indigo-50' : 'border-slate-100 opacity-80 hover:opacity-100'
-                }`}
+                className={`group p-5 bg-white border rounded-2xl shadow-sm hover:shadow-md transition-all flex items-start gap-4 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 ${!notif.read ? 'border-l-4 border-l-indigo-500 ring-1 ring-indigo-50' : 'border-slate-100 opacity-80 hover:opacity-100'
+                  }`}
               >
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${style.bg} ${style.color} ${style.border} group-hover:scale-110 transition-transform`}>
                   <style.icon className="w-6 h-6" />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <h3 className={`text-base font-bold text-slate-900 truncate tracking-tight ${!notif.read ? 'text-indigo-950' : ''}`}>
@@ -196,15 +195,15 @@ const Notifications: React.FC = () => {
                   <p className={`text-sm leading-relaxed mb-3 ${!notif.read ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
                     {notif.description}
                   </p>
-                  
+
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
+                    <button
                       onClick={() => toggleRead(notif.id)}
                       className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center gap-1.5"
                     >
                       {notif.read ? <><EyeOff className="w-3 h-3" /> Mark Unread</> : <><Eye className="w-3 h-3" /> Mark Read</>}
                     </button>
-                    <button 
+                    <button
                       onClick={() => deleteNotif(notif.id)}
                       className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors flex items-center gap-1.5"
                     >
@@ -227,7 +226,7 @@ const Notifications: React.FC = () => {
             <p className="text-sm text-slate-500 max-w-[280px] leading-relaxed mb-8">
               No new notifications for your current filters. We'll let you know when your AI insights are ready.
             </p>
-            <button 
+            <button
               onClick={() => setFilter('all')}
               className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-200"
             >
@@ -241,7 +240,7 @@ const Notifications: React.FC = () => {
       {notifs.length > 0 && (
         <div className="mt-12 p-6 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-3xl flex items-center gap-6 shadow-sm">
           <div className="w-14 h-14 bg-white border border-indigo-100 rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-             <AlertCircle className="w-7 h-7 text-indigo-500" />
+            <AlertCircle className="w-7 h-7 text-indigo-500" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-indigo-900 mb-1">Study Tip</h4>

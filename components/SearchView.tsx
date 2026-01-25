@@ -34,7 +34,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
     return [
       { title: "AI Intern", company: "BrainLab", type: "Remote" },
       { title: "Content Writer", company: "Edutext", type: "Full-time" },
-      { title: "Software Engineer", company: "EduVault", type: "Hybrid" }
+      { title: "Software Engineer", company: "AI EduVault", type: "Hybrid" }
     ].filter(j => j.title.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm.toLowerCase().includes('job') || searchTerm.toLowerCase().includes('career'));
   }, [searchTerm]);
 
@@ -76,7 +76,7 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
 
           <section>
             <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Trending in EduVault
+              <TrendingUp className="w-3.5 h-3.5" /> Trending in AI EduVault
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
@@ -108,8 +108,8 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-t-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-b-2 ${activeTab === tab.id
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
                   }`}
               >
                 <tab.icon className="w-3.5 h-3.5" />

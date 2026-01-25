@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
             <img src="https://i.ibb.co/zhbHCxnh/logo.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tighter text-slate-900 leading-none">EduVault</h1>
+            <h1 className="text-2xl font-black tracking-tighter text-slate-900 leading-none">AI EduVault</h1>
             <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-1">Smart E-Library</p>
           </div>
         </NavLink>
@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
           <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shadow-lg">JD</div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-black text-slate-900 truncate">Jane Student</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">EduVault Pro</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI EduVault Pro</p>
           </div>
         </NavLink>
       </div>
