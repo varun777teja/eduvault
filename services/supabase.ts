@@ -10,12 +10,12 @@ const getEnv = (key: string): string => {
 };
 
 const supabaseUrl = 'https://pnqsiejxuwfgbzyeglhd.supabase.co';
-const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY') || 'sb_publishable_KZbgCq0pW84Jov0XRUTt6A_yAABNhBh';
+const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY');
 
-export const isSupabaseConfigured = 
-  !!supabaseAnonKey && 
+export const isSupabaseConfigured =
+  !!supabaseAnonKey &&
   supabaseAnonKey !== 'placeholder-anon-key' &&
-  supabaseAnonKey !== '';
+  supabaseAnonKey.length > 20;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
