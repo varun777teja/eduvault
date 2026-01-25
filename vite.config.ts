@@ -19,6 +19,6 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, '.'),
       }
     },
-    base: '/eduvault/',
+    base: env.VITE_BASE_PATH || '/',
   };
 });
