@@ -64,7 +64,7 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
               <img
                 src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png"
                 alt="AI"
-                className={`w-5 h-5 object-contain ${location.pathname === '/ai-future' ? 'animate-elastic-pop drop-shadow-[0_0_8px_rgba(147,51,234,0.4)]' : ''}`}
+                className={`w-8 h-8 object-contain ${location.pathname === '/ai-future' ? 'animate-elastic-pop drop-shadow-[0_0_8px_rgba(147,51,234,0.4)]' : ''}`}
               />
             </div>
           </NavLink>
