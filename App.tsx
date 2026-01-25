@@ -139,6 +139,16 @@ const INITIAL_DOCS: Document[] = [
     content: 'Comprehensive coverage of signals and systems.',
     coverUrl: 'https://picsum.photos/seed/signals2/300/400',
     fileUrl: '/books/signals-and-systems-by-ananda-kumar-pdf-free.pdf'
+  },
+  {
+    id: '13',
+    title: 'Unit -1 - ES Material',
+    author: 'Unknown',
+    category: 'Engineering',
+    uploadDate: '2024-02-01',
+    content: 'Unit 1 study material for ES.',
+    coverUrl: 'https://picsum.photos/seed/esmat/300/400',
+    fileUrl: '/books/Unit -1 - ES Material-1.pdf'
   }
 ];
 
@@ -208,7 +218,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!session) return;
     if (isLocalMode) {
-      const savedDocs = localStorage.getItem('eduvault_docs_v2');
+      const savedDocs = localStorage.getItem('eduvault_docs_v3');
       const savedTasks = localStorage.getItem('eduvault_tasks');
       setDocuments(savedDocs ? JSON.parse(savedDocs) : INITIAL_DOCS);
       setTasks(savedTasks ? JSON.parse(savedTasks) : []);
@@ -236,7 +246,7 @@ const App: React.FC = () => {
       if (isLocalMode) {
         const updated = documents.filter(d => d.id !== id);
         setDocuments(updated);
-        localStorage.setItem('eduvault_docs_v2', JSON.stringify(updated));
+        localStorage.setItem('eduvault_docs_v3', JSON.stringify(updated));
       } else {
         const { error } = await supabase.from('documents').delete().eq('id', id);
         if (error) throw error;

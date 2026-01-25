@@ -55,8 +55,8 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
         window.location.reload();
       }
     } else {
-      const savedDocs = JSON.parse(localStorage.getItem('eduvault_docs_v2') || '[]');
-      localStorage.setItem('eduvault_docs_v2', JSON.stringify([...savedDocs, docToSave]));
+      const savedDocs = JSON.parse(localStorage.getItem('eduvault_docs_v3') || '[]');
+      localStorage.setItem('eduvault_docs_v3', JSON.stringify([...savedDocs, docToSave]));
       window.location.reload();
     }
   };
