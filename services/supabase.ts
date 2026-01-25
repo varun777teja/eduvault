@@ -3,19 +3,20 @@ import { createClient } from '@supabase/supabase-js';
 
 const getEnv = (key: string): string => {
   try {
-    return (window as any).process?.env?.[key] || (process?.env?.[key]) || '';
+    return import.meta.env[key] || (window as any).process?.env?.[key] || '';
   } catch {
     return '';
   }
 };
 
 const supabaseUrl = 'https://pnqsiejxuwfgbzyeglhd.supabase.co';
-const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY');
+const envKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
+const supabaseAnonKey = envKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder'; // Fallback to prevent crash
 
 export const isSupabaseConfigured =
-  !!supabaseAnonKey &&
-  supabaseAnonKey !== 'placeholder-anon-key' &&
-  supabaseAnonKey.length > 20;
+  !!envKey &&
+  envKey !== 'placeholder-anon-key' &&
+  envKey.length > 20;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
