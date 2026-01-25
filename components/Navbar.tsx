@@ -70,7 +70,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchTerm, onSearchChange, syncStatus 
 
       <div className="hidden md:flex flex-1 max-w-xl mx-8">
         <div className="relative w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+          <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="Search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-50 text-slate-400 group-focus-within:opacity-100 transition-opacity" />
           <input
             type="text"
             value={searchTerm}
