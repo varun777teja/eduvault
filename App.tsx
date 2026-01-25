@@ -208,7 +208,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!session) return;
     if (isLocalMode) {
-      const savedDocs = localStorage.getItem('eduvault_docs');
+      const savedDocs = localStorage.getItem('eduvault_docs_v2');
       const savedTasks = localStorage.getItem('eduvault_tasks');
       setDocuments(savedDocs ? JSON.parse(savedDocs) : INITIAL_DOCS);
       setTasks(savedTasks ? JSON.parse(savedTasks) : []);
@@ -236,7 +236,7 @@ const App: React.FC = () => {
       if (isLocalMode) {
         const updated = documents.filter(d => d.id !== id);
         setDocuments(updated);
-        localStorage.setItem('eduvault_docs', JSON.stringify(updated));
+        localStorage.setItem('eduvault_docs_v2', JSON.stringify(updated));
       } else {
         const { error } = await supabase.from('documents').delete().eq('id', id);
         if (error) throw error;
