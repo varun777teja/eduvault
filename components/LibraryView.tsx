@@ -6,6 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Document } from '../types';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
+import PdfThumbnail from './PdfThumbnail';
 
 interface LibraryViewProps {
   documents: Document[];
@@ -76,7 +77,11 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
         {filteredDocs.map((doc) => (
           <div key={doc.id} className="group bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col">
             <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
-              <img src={doc.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" />
+              <PdfThumbnail
+                fileUrl={doc.fileUrl || ''}
+                coverUrl={doc.coverUrl}
+                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000"
+              />
               <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
                 <button onClick={() => navigate(`/reader/${doc.id}`)} className="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 shadow-xl"><BookOpen className="w-4 h-4" /> Start Reading</button>
               </div>
