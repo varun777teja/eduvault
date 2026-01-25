@@ -9,14 +9,15 @@ const getEnv = (key: string): string => {
   }
 };
 
-const supabaseUrl = 'https://pnqsiejxuwfgbzyeglhd.supabase.co';
-const envKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
-const supabaseAnonKey = envKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder'; // Fallback to prevent crash
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || 'https://pnqsiejxuwfgbzyeglhd.supabase.co';
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || 'placeholder-anon-key';
 
 export const isSupabaseConfigured =
-  !!envKey &&
-  envKey !== 'placeholder-anon-key' &&
-  envKey.length > 20;
+  !!supabaseUrl &&
+  supabaseUrl !== 'https://placeholder.supabase.co' &&
+  !!supabaseAnonKey &&
+  supabaseAnonKey !== 'placeholder-anon-key' &&
+  supabaseAnonKey.length > 20;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
