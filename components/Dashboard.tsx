@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Document } from '../types';
 import { INTERNSHIPS, COURSES, AI_TOOLS } from '../constants/resources';
+import PdfThumbnail from './PdfThumbnail';
 
 interface DashboardProps {
   documents: Document[];
@@ -47,8 +48,15 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
         <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-6 no-scrollbar -mx-2 px-4 lg:px-2">
           {documents.length > 0 ? documents.slice(0, 6).map((doc) => (
             <div key={doc.id} className="flex-none w-40 lg:w-48 group cursor-pointer animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="aspect-[3/4] rounded-[1.5rem] lg:rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 mb-3 lg:mb-4 group-hover:-translate-y-2 transition-transform duration-500">
-                <img src={doc.coverUrl} alt={doc.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+              <div className="aspect-[3/4] rounded-[1.5rem] lg:rounded-[2rem] overflow-hidden shadow-xl border border-white/20 mb-3 lg:mb-4 group-hover:-translate-y-2 transition-transform duration-500 relative bg-slate-100">
+                <PdfThumbnail
+                  fileUrl={doc.fileUrl || ''}
+                  coverUrl={doc.coverUrl}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                  <span className="text-[10px] text-white font-bold bg-white/20 backdrop-blur-md px-2 py-1 rounded-lg">Read Now</span>
+                </div>
               </div>
               <h4 className="font-bold text-slate-900 text-xs lg:text-sm line-clamp-1">{doc.title}</h4>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{doc.category}</p>
