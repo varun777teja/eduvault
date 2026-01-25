@@ -115,24 +115,42 @@ const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
             </a>
           ))}
 
-          {activeTab === 'courses' && COURSES.map((item) => (
-            <a href={item.link} target="_blank" rel="noopener noreferrer" key={item.id} className="group p-6 bg-white border border-slate-100 rounded-[2rem] hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col hover:-translate-y-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <GraduationCap className="w-6 h-6" />
-                </div>
-                <span className="px-3 py-1 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:bg-orange-600 group-hover:text-white transition-colors">{item.domain}</span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors mb-1">{item.title}</h3>
-              <p className="text-xs font-medium text-slate-500">{item.provider}</p>
-              <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50 gap-2">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Start Learning</span>
-                <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </div>
-              </div>
-            </a>
-          ))}
+          {activeTab === 'courses' && (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-10">
+              {['Government', 'Tech Giant', 'University'].map((category) => {
+                const categoryCourses = COURSES.filter((c: any) => c.category === category);
+                if (categoryCourses.length === 0) return null;
+                return (
+                  <div key={category}>
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-orange-500" />
+                      {category === 'Government' ? 'Indian Government & IITs' : category === 'Tech Giant' ? 'Global Tech Giants' : 'Prestigious Universities'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {categoryCourses.map((item) => (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" key={item.id} className="group p-6 bg-white border border-slate-100 rounded-[2rem] hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col hover:-translate-y-1">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                              <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <span className="px-3 py-1 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:bg-orange-600 group-hover:text-white transition-colors">{item.domain}</span>
+                          </div>
+                          <h3 className="text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors mb-1">{item.title}</h3>
+                          <p className="text-xs font-medium text-slate-500">{item.provider}</p>
+                          <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50 gap-2">
+                            <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Start Learning</span>
+                            <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {activeTab === 'ai' && AI_TOOLS.map((item) => (
             <a href={item.link} target="_blank" rel="noopener noreferrer" key={item.id} className="group p-6 bg-white border border-slate-100 rounded-[2rem] hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col hover:-translate-y-1">
