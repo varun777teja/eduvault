@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
       <div className="p-8 pb-4">
         <NavLink to="/" className="flex items-center gap-3 group">
           <div className="w-12 h-12 bg-white border border-slate-100 shadow-xl rounded-2xl flex items-center justify-center p-1 group-hover:scale-110 transition-transform duration-500">
-            <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
+            <img src="https://i.ibb.co/MD37Z5pZ/Your-paragraph-text-removebg-preview.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tighter text-slate-900 leading-none">AI EduVault</h1>

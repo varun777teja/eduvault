@@ -37,7 +37,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchTerm, onSearchChange, syncStatus 
         <Link to="/" className="flex items-center gap-3 shrink-0 group">
           <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white border border-slate-100 shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-105">
             <img
-              src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png"
+              src="https://i.ibb.co/MD37Z5pZ/Your-paragraph-text-removebg-preview.png"
               alt="AI EduVault Logo"
               className="w-full h-full object-contain p-1.5"
               onError={(e) => {

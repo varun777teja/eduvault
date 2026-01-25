@@ -39,7 +39,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, initialTab = 'internsh
         <div className="flex items-center justify-between mb-4 lg:mb-6 px-2">
           <div>
             <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2 lg:gap-3">
-              <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="Library" className="w-5 h-5 lg:w-6 lg:h-6 object-contain" />
+              <img src="https://i.ibb.co/MD37Z5pZ/Your-paragraph-text-removebg-preview.png" alt="Library" className="w-5 h-5 lg:w-6 lg:h-6 object-contain" />
               Live Vault History
             </h2>
             <p className="text-[9px] lg:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Library Feed</p>
