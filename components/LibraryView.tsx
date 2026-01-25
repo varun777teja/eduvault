@@ -103,8 +103,8 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-xl" onClick={() => setIsAddModalOpen(false)}></div>
-          <div className="relative bg-white w-full max-w-3xl rounded-[3.5rem] p-10 lg:p-14 shadow-2xl overflow-hidden">
-            <header className="flex items-center justify-between mb-8">
+          <div className="relative bg-white w-full max-w-3xl rounded-[3.5rem] p-10 lg:p-14 shadow-2xl max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <header className="flex items-center justify-between mb-8 sticky top-0 bg-white z-10 pb-4">
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Vault Entry</h2>
               <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-slate-100 rounded-2xl transition-all"><X className="w-6 h-6 text-slate-400" /></button>
             </header>
