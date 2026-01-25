@@ -18,6 +18,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [localSearch, setLocalSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [tempPdfUrl, setTempPdfUrl] = useState<string | null>(null);
 
   const [newDoc, setNewDoc] = useState<{
     title: string;
@@ -131,10 +132,13 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            const blobUrl = URL.createObjectURL(file);
                             setNewDoc({ ...newDoc, title: newDoc.title || file.name.replace('.pdf', ''), fileUrl: `/books/${file.name}` });
+                            setTempPdfUrl(blobUrl);
                             alert(`File selected! Please manually move "${file.name}" to the "public/books" folder for it to work locally.`);
                           } else {
-                            setNewDoc({ ...newDoc, fileUrl: '' }); // Clear fileUrl if no file is selected
+                            setNewDoc({ ...newDoc, fileUrl: '' });
+                            setTempPdfUrl(null);
                           }
                         }}
                         className="w-full px-5 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
@@ -146,8 +150,12 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
                 <div className="flex flex-col gap-4">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Book Cover</label>
                   <div className="flex-1 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 relative group overflow-hidden">
-                    {newDoc.coverUrl ? (
-                      <img src={newDoc.coverUrl} className="w-full h-full object-cover rounded-[2rem]" />
+                    {tempPdfUrl || newDoc.coverUrl ? (
+                      <PdfThumbnail
+                        fileUrl={tempPdfUrl || ''}
+                        coverUrl={newDoc.coverUrl}
+                        className="w-full h-full object-cover rounded-[2rem]"
+                      />
                     ) : (
                       <div className="text-center">
                         <ImagePlus className="w-8 h-8 text-slate-300 mx-auto mb-2" />
