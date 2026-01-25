@@ -55,6 +55,20 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             </div>
           </NavLink>
 
+          {/* AI Future */}
+          <NavLink
+            to="/ai-future"
+            className={({ isActive }) => `flex-1 flex flex-col items-center gap-0.5 p-2 transition-all duration-300 ${isActive ? 'text-purple-600' : 'text-slate-400'}`}
+          >
+            <div className={`p-1.5 rounded-xl transition-all ${location.pathname === '/ai-future' ? 'bg-purple-50 shadow-inner' : ''}`}>
+              <img
+                src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png"
+                alt="AI"
+                className={`w-5 h-5 object-contain ${location.pathname === '/ai-future' ? 'animate-elastic-pop drop-shadow-[0_0_8px_rgba(147,51,234,0.4)]' : ''}`}
+              />
+            </div>
+          </NavLink>
+
           {/* Stats */}
           <NavLink
             to="/stats"
