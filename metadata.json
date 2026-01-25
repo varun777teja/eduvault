@@ -1,0 +1,8 @@
+{
+  "name": "EduVault: Smart E-Library",
+  "description": "A modern student-centric e-library for managing study materials with integrated Gemini AI for instant explanations and academic support.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
