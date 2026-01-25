@@ -8,8 +8,8 @@ import {
   Timer, Loader2, Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Document, Task } from '../types';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
+import { Document, Task } from '../types.ts';
+import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
 
 interface StatsProps {
   documents: Document[];

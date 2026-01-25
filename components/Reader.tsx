@@ -7,8 +7,8 @@ import {
   ClipboardCheck, Map, RefreshCw, ChevronRight, ChevronLeft,
   Maximize2, Minimize2, ExternalLink, Globe, Link2, Mic, X, Volume2
 } from 'lucide-react';
-import { Document, ChatMessage } from '../types';
-import { explainConcept, streamChat, clearChatSession, connectLiveAssistant } from '../services/geminiService';
+import { Document, ChatMessage } from '../types.ts';
+import { explainConcept, streamChat, clearChatSession, connectLiveAssistant } from '../services/geminiService.ts';
 
 interface ReaderProps {
   documents: Document[];

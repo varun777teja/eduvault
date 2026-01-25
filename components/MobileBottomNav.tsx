@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, Sparkles, Home, X, 
-  BarChart3, Library
+  BarChart3, Library, ArrowUpRight
 } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { getDailyAcademicInsight } from '../services/geminiService';
+import { getDailyAcademicInsight } from '../services/geminiService.ts';
 
 const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string) => void }> = ({ searchTerm, onSearchChange }) => {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -47,7 +47,7 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
 
   return (
     <>
-      {/* AI Futures Menu Overlay - Now minimal/blank as requested */}
+      {/* AI Futures Menu Overlay */}
       {isAiModalOpen && (
         <div className="lg:hidden fixed inset-0 z-[200] animate-in fade-in duration-300">
           <div 
@@ -55,17 +55,17 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
             onClick={() => setIsAiModalOpen(false)}
           ></div>
           
-          <div className="absolute bottom-24 left-4 right-4 bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 overflow-hidden flex flex-col items-center justify-center min-h-[300px]">
+          <div className="absolute bottom-24 left-4 right-4 bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 overflow-hidden flex flex-col items-center justify-center min-h-[350px]">
             <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-24 -mt-24"></div>
             
-            <header className="relative mb-6 text-center shrink-0">
+            <header className="relative mb-6 text-center shrink-0 w-full">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center p-3 shadow-xl border border-white/10 ring-4 ring-indigo-500/10 overflow-hidden">
                   <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" alt="Brahma AI" className="w-full h-full object-contain" />
                 </div>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Vault AI</h2>
-              <div className="mt-3 px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Brahma AI Hub</h2>
+              <div className="mt-4 px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl mx-4">
                 <div className="flex items-center gap-1 text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-1 justify-center">
                   <Sparkles className="w-2.5 h-2.5" /> Daily Academic Insight
                 </div>
@@ -75,10 +75,23 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
               </div>
             </header>
 
-            <div className="py-10 text-center opacity-20">
-               <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-8 h-8 mx-auto mb-2 grayscale" alt="" />
-               <p className="text-[10px] font-black uppercase tracking-widest">Futures Hidden</p>
+            <div className="w-full px-4 mb-4">
+              <a 
+                href="https://brahma-ai-vert.vercel.app/"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
+              >
+                Enter Platform <ArrowUpRight className="w-4 h-4" />
+              </a>
             </div>
+
+            <button 
+              onClick={() => { setIsAiModalOpen(false); navigate('/ai-vault'); }}
+              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors"
+            >
+              View Hub Details
+            </button>
           </div>
         </div>
       )}

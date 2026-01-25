@@ -6,9 +6,9 @@ import {
   AlertTriangle, Trash
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Document } from '../types';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
-import { scanDocumentImage, generateBookCover } from '../services/geminiService';
+import { Document } from '../types.ts';
+import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
+import { scanDocumentImage, generateBookCover } from '../services/geminiService.ts';
 
 interface LibraryViewProps {
   documents: Document[];
@@ -201,7 +201,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ documents, onRemove }) => {
                       type="button" 
                       onClick={handleAiCover}
                       disabled={isGeneratingCover || !newDoc.title}
-                      className="absolute bottom-4 bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl active:scale-95 disabled:opacity-50"
+                      className="absolute bottom-4 bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl active:scale-95 transition-all shadow-indigo-100 disabled:opacity-50"
                     >
                       {isGeneratingCover ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                       Generate with AI

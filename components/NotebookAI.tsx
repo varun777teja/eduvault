@@ -6,8 +6,8 @@ import {
   ChevronRight, BrainCircuit, FileText, Search,
   X, Check, ChevronLeft
 } from 'lucide-react';
-import { Note } from '../types';
-import { improveNoteContent, generateNoteSummary, generateFlashcards } from '../services/geminiService';
+import { Note } from '../types.ts';
+import { improveNoteContent, generateNoteSummary, generateFlashcards } from '../services/geminiService.ts';
 
 const NotebookAI: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -168,7 +168,7 @@ const NotebookAI: React.FC = () => {
               />
             </div>
 
-            {/* AI Floating Toolbox - Adjusted for mobile position and scale */}
+            {/* AI Floating Toolbox */}
             <div className="fixed lg:absolute bottom-28 lg:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-3 lg:py-4 bg-slate-950 text-white rounded-full lg:rounded-[2.5rem] shadow-2xl border border-white/10 backdrop-blur-xl z-40 scale-90 lg:scale-100">
                <div className="flex items-center gap-2 px-2 lg:px-3 border-r border-white/10 mr-1 lg:mr-2">
                  <img src="https://i.ibb.co/6JbSBhjt/logobrahma.png" className="w-4 h-4 object-contain mr-2" alt="" />

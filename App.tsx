@@ -69,7 +69,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Heartbeat for Study Time Tracking
   useEffect(() => {
     if (!session) return;
     const interval = setInterval(async () => {
@@ -92,7 +91,7 @@ const App: React.FC = () => {
           await supabase.from('study_sessions').insert([{ user_id: session.user.id, date: today, minutes: 1 }]);
         }
       }
-    }, 60000); // Every 1 minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [session, isLocalMode]);
@@ -195,6 +194,7 @@ const App: React.FC = () => {
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
               <Route path="/ai-vault" element={<AIPage documents={documents} />} />
               <Route path="/notebook" element={<NotebookAI />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/stats" element={<Stats documents={documents} tasks={tasks} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} initialTasks={tasks} />} />
               <Route path="/profile" element={<ProfileView documents={documents} onLogout={handleLogout} />} />

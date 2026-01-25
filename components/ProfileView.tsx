@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   User, Settings, ShieldCheck, Award, 
@@ -6,7 +7,7 @@ import {
   BadgeCheck, Trophy, Star,
   Zap, Clock, LogOut, Hash, Layers
 } from 'lucide-react';
-import { Document } from '../types';
+import { Document } from '../types.ts';
 import { supabase } from '../services/supabase.ts';
 
 interface ProfileViewProps {

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Sparkles, Bell, AlertCircle, CheckCircle2, X } from 'lucide-react';
-import { AppNotification } from '../types';
+import { AppNotification } from '../types.ts';
 
 interface NotificationSystemProps {
   notifications: AppNotification[];

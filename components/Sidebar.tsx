@@ -25,8 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
   ];
 
   const aiTools = [
-    { label: 'AI Vault', icon: 'image', to: '/ai-vault', color: 'text-indigo-500' },
-    { label: 'Summarizer', icon: Zap, to: '/ai-vault', color: 'text-amber-500' },
+    { label: 'Brahma Hub', icon: 'image', to: '/ai-vault', color: 'text-indigo-500' },
+    { label: 'AI Summarizer', icon: Zap, to: '/ai-vault', color: 'text-amber-500' },
     { label: 'Intelligence', icon: BrainCircuit, to: '/ai-vault', color: 'text-emerald-500' },
   ];
 
@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
 
         <section>
           <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest px-2 mb-4 flex items-center justify-between">
-            Intelligence Hub <Sparkles className="w-3 h-3 animate-pulse" />
+            Brahma Hub <Sparkles className="w-3 h-3 animate-pulse" />
           </div>
           <div className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-3xl p-5 shadow-sm space-y-4">
              {aiTools.map((tool) => (

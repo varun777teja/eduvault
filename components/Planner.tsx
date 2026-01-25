@@ -6,8 +6,8 @@ import {
   Check, Rocket, ArrowLeft, Loader2, Hourglass
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Task } from '../types';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
+import { Task } from '../types.ts';
+import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
 
 interface PlannerProps {
   onNotify?: (type: 'success' | 'info' | 'alert' | 'task', title: string, msg: string) => void;

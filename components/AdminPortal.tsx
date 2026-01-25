@@ -8,8 +8,8 @@ import {
   ArrowUpRight, Download, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Document } from '../types';
-import { supabase } from '../services/supabase';
+import { Document } from '../types.ts';
+import { supabase } from '../services/supabase.ts';
 
 interface AdminPortalProps {
   documents: Document[];
@@ -103,13 +103,13 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ documents, onRemove }) => {
               </button>
               <button 
                 onClick={() => setFilter('public')}
-                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'public' ? 'bg-emerald-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'public' ? 'bg-emerald-50 text-slate-900' : 'text-slate-400 hover:text-white'}`}
               >
                 Public
               </button>
               <button 
                 onClick={() => setFilter('private')}
-                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'private' ? 'bg-indigo-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'private' ? 'bg-indigo-50 text-slate-900' : 'text-slate-400 hover:text-white'}`}
               >
                 Vault
               </button>

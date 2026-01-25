@@ -5,11 +5,12 @@ import {
   Cpu, ArrowRight, History, TrendingUp,
   X, BrainCircuit, ExternalLink, Filter,
   FileText, GraduationCap, Loader2, Send,
-  MessageSquare, User
+  MessageSquare, User, Building2, Globe, Star,
+  ArrowUpRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Document, ChatMessage } from '../types';
-import { chatWithAI, explainConcept } from '../services/geminiService';
+import { Document, ChatMessage } from '../types.ts';
+import { chatWithAI, explainConcept } from '../services/geminiService.ts';
 
 interface SearchViewProps {
   documents: Document[];
@@ -118,13 +119,27 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
     }
   };
 
+  const internshipAndCareers = [
+    { title: "Frontend Intern", company: "Google", type: "Summer 2025", location: "Remote", color: "text-blue-500", bg: "bg-blue-50", link: "https://careers.google.com" },
+    { title: "AI Product Design", company: "Meta", type: "12 Weeks", location: "London", color: "text-purple-500", bg: "bg-purple-50", link: "https://metacareers.com" },
+    { title: "Data Analytics", company: "Microsoft", type: "Fall Intake", location: "Hyderabad", color: "text-emerald-500", bg: "bg-emerald-50", link: "https://careers.microsoft.com" },
+    { title: "ML Engineering", company: "NVIDIA", type: "Research", location: "Remote", color: "text-purple-500", bg: "bg-purple-50", link: "https://nvidia.com/careers" },
+    { title: "Junior Frontend Engineer", company: "TechFlow", type: "Full-time", location: "Remote", icon: Briefcase, color: "text-blue-500", bg: "bg-blue-50" },
+    { title: "AI Research Assistant", company: "DeepMind Lab", type: "Internship", location: "London", icon: Cpu, color: "text-purple-500", bg: "bg-purple-50" },
+    { title: "Cloud Architect Associate", company: "AWS", type: "Full-time", location: "Seattle", icon: Building2, color: "text-amber-500", bg: "bg-amber-50" },
+    { title: "Cybersecurity Analyst", company: "CrowdStrike", type: "Full-time", location: "Remote", icon: Star, color: "text-rose-500", bg: "bg-rose-50" },
+  ];
+
   const jobSuggestions = useMemo(() => {
-    if (!searchTerm) return [];
-    return [
-      { title: "AI Intern", company: "BrainLab", type: "Remote" },
-      { title: "Content Writer", company: "Edutext", type: "Full-time" },
-      { title: "Software Engineer", company: "EduVault", type: "Hybrid" }
-    ].filter(j => j.title.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm.toLowerCase().includes('job') || searchTerm.toLowerCase().includes('career'));
+    if (!searchTerm) return internshipAndCareers.slice(0, 4);
+    const searchLow = searchTerm.toLowerCase();
+    return internshipAndCareers.filter(j => 
+      j.title.toLowerCase().includes(searchLow) || 
+      j.company.toLowerCase().includes(searchLow) ||
+      searchLow.includes('job') || 
+      searchLow.includes('intern') || 
+      searchLow.includes('career')
+    );
   }, [searchTerm]);
 
   return (
@@ -374,29 +389,47 @@ const SearchView: React.FC<SearchViewProps> = ({ documents, searchTerm, onSearch
             )}
 
             {(activeTab === 'all' || activeTab === 'careers') && (
-              <div className="lg:col-span-4 space-y-8">
+              <div className="lg:col-span-12 space-y-8">
                 <section>
                   <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6 px-2 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-amber-500" />
-                    Career Match
+                    Career & Internship Match
                   </h2>
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {jobSuggestions.length > 0 ? jobSuggestions.map((job, i) => (
-                      <div key={i} className="p-5 bg-white border border-slate-200 rounded-[2rem] hover:shadow-lg transition-all group">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                            <GraduationCap className="w-5 h-5" />
+                      <div key={i} className="p-6 bg-white border border-slate-200 rounded-[2.5rem] hover:shadow-2xl transition-all group flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between mb-6">
+                            <div className={`w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm`}>
+                              {(job as any).icon ? <(job as any).icon className="w-6 h-6" /> : <Building2 className="w-6 h-6" />}
+                            </div>
+                            <button className="p-2.5 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                              <ExternalLink className="w-4 h-4 text-slate-400" />
+                            </button>
                           </div>
-                          <button className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                            <ExternalLink className="w-3 h-3 text-slate-400" />
-                          </button>
+                          <div className="mb-6">
+                             <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1">{(job as any).company}</h4>
+                             <h3 className="text-lg lg:text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">{(job as any).title}</h3>
+                             <div className="flex items-center gap-3 mt-3">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{(job as any).type}</span>
+                                <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{(job as any).location}</span>
+                             </div>
+                          </div>
                         </div>
-                        <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{job.title}</h3>
-                        <p className="text-xs text-slate-500 mt-1">{job.company} • {job.type}</p>
+                        <a 
+                          href={(job as any).link || "#"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl hover:bg-slate-800 active:scale-95 transition-all"
+                        >
+                          View Opportunity <ArrowUpRight className="w-3.5 h-3.5" />
+                        </a>
                       </div>
                     )) : (
-                      <div className="p-8 bg-slate-50 rounded-[2rem] text-center border border-dashed border-slate-200">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No matching careers</p>
+                      <div className="col-span-full py-20 text-center bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                        <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No matching careers found in the vault</p>
                       </div>
                     )}
                   </div>
