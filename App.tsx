@@ -318,6 +318,7 @@ const App: React.FC = () => {
           <main className="flex-1 overflow-y-auto custom-scrollbar">
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} /></div>} />
+              <Route path="/ai-future" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} initialTab="ai" /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
               <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={handleDeleteDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />

@@ -18,6 +18,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
   const mainLinks = [
     { to: '/', icon: LayoutDashboard, label: 'Feed' },
     { to: '/library', icon: Book, label: 'Vault Library' },
+    {
+      to: '/ai-future',
+      label: 'AI Future',
+      icon: (props: any) => (
+        <img
+          src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png"
+          alt="AI"
+          className={`${props.className} object-contain`}
+        />
+      )
+    },
     { to: '/planner', icon: CalendarDays, label: 'Planner' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/stats', icon: BarChart3, label: 'Insights' },

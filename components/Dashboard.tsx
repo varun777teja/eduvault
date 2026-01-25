@@ -12,10 +12,11 @@ import PdfThumbnail from './PdfThumbnail';
 
 interface DashboardProps {
   documents: Document[];
+  initialTab?: 'internships' | 'courses' | 'ai';
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ documents }) => {
-  const [activeTab, setActiveTab] = useState<'internships' | 'courses' | 'ai'>('internships');
+const Dashboard: React.FC<DashboardProps> = ({ documents, initialTab = 'internships' }) => {
+  const [activeTab, setActiveTab] = useState<'internships' | 'courses' | 'ai'>(initialTab);
 
   return (
     <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-top-4 duration-700 pb-20">
