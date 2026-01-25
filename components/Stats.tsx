@@ -1,40 +1,57 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
-import { 
-  BarChart3, Clock, BrainCircuit, Flame, 
-  ArrowLeft, ChevronRight, TrendingUp,
-  BookOpen, Calendar, Target, Library,
-  Sparkles, History, ArrowUpRight, CheckSquare,
-  Timer
+import {
+  TrendingUp,
+  ArrowLeft,
+  History, CheckSquare,
+  Timer, Target, Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Document, Task } from '../types';
 
 interface StatsProps {
   documents: Document[];
-  // Fix: Added tasks prop to fix the type mismatch in App.tsx
   tasks: Task[];
 }
 
 const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
   const navigate = useNavigate();
-  const [sessionStats, setSessionStats] = useState({ minutes: 0, ai_hits: 0 });
+  const [totalMinutes, setTotalMinutes] = useState(0);
+  const [weeklyData, setWeeklyData] = useState<{ day: string; value: number }[]>([]);
   const [readHistory, setReadHistory] = useState<any[]>([]);
 
-  // Fix: Removed local tasks state as it is now provided via props from App.tsx
-  // which handles synchronization with Supabase/LocalStorage.
-
   useEffect(() => {
-    const loadData = () => {
-      const savedStats = JSON.parse(localStorage.getItem('eduvault_stats') || '{"minutes":45, "ai_hits":12}');
+    const loadRealtimeData = () => {
+      // 1. Load Study Stats (Minutes per day)
+      const rawStats = JSON.parse(localStorage.getItem('eduvault_study_stats') || '{}');
+
+      // Calculate Total Minutes
+      let total = 0;
+      Object.values(rawStats).forEach((m: any) => total += m);
+      setTotalMinutes(total);
+
+      // Calculate Last 7 Days for Graph
+      const days = [];
+      const today = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        // Use shorter day names for the graph axis
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        days.push({
+          day: dayName,
+          value: rawStats[dateStr] || 0
+        });
+      }
+      setWeeklyData(days);
+
+      // 2. Load Read History
       const savedHistory = JSON.parse(localStorage.getItem('eduvault_history') || '[]');
-      // Fix: we no longer need to load tasks locally here
-      setSessionStats(savedStats);
       setReadHistory(savedHistory);
     };
-    
-    loadData();
-    const interval = setInterval(loadData, 5000); // Sync data frequently
+
+    loadRealtimeData();
+    const interval = setInterval(loadRealtimeData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,7 +65,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const time = now.toTimeString().split(' ')[0].substring(0, 5);
-    
+
     return tasks
       .filter(t => !t.completed && (t.date > today || (t.date === today && t.time >= time)))
       .sort((a, b) => {
@@ -56,15 +73,6 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
         return a.time.localeCompare(b.time);
       })[0];
   }, [tasks]);
-
-  const performanceData = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const baseMastery = sessionStats.minutes / 10;
-    return days.map((day, idx) => ({
-      day,
-      mastery: Math.min(100, Math.max(10, baseMastery * (0.8 + Math.random() * 0.4) + (idx * 5)))
-    }));
-  }, [sessionStats]);
 
   const subjectSplit = useMemo(() => {
     if (documents.length === 0) return [];
@@ -78,21 +86,28 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
     })).sort((a, b) => b.percent - a.percent);
   }, [documents]);
 
-  const topSubject = subjectSplit[0]?.label || 'General Studies';
-
+  // Graph Logic
   const graphWidth = 600;
   const graphHeight = 200;
-  const points = performanceData.map((d, i) => ({
-    x: (i / (performanceData.length - 1)) * graphWidth,
-    y: graphHeight - (d.mastery / 100) * graphHeight
+  // Normalize values: find max value in the week to scale the graph, prevent division by zero
+  const maxVal = Math.max(...weeklyData.map(d => d.value), 60); // Minimum scale of 60 mins
+
+  const points = weeklyData.map((d, i) => ({
+    x: (i / (weeklyData.length - 1)) * graphWidth,
+    y: graphHeight - (d.value / maxVal) * graphHeight
   }));
-  const pathData = `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
-  const areaData = `${pathData} L ${points[points.length-1].x} ${graphHeight} L ${points[0].x} ${graphHeight} Z`;
+
+  // Safe path generation for < 2 points
+  const pathData = points.length > 1
+    ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
+    : `M 0 ${graphHeight} L ${graphWidth} ${graphHeight}`;
+
+  const areaData = `${pathData} L ${points[points.length - 1]?.x || graphWidth} ${graphHeight} L ${points[0]?.x || 0} ${graphHeight} Z`;
 
   return (
     <div className="max-w-6xl mx-auto p-4 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-28 lg:pb-10">
       <div className="flex items-center gap-4 mb-10">
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="p-2.5 hover:bg-white rounded-2xl shadow-sm border border-slate-200 text-slate-500 transition-all active:scale-90"
         >
@@ -114,10 +129,10 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                   <TrendingUp className="w-5 h-5 text-indigo-600" />
                   Mastery Progress
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Socratic Skill Evolution</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">7-Day Study Trend</p>
               </div>
               <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter">
-                <Sparkles className="w-3 h-3" /> Growth: +12%
+                <Sparkles className="w-3 h-3" /> Real-time
               </div>
             </div>
 
@@ -129,23 +144,30 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                     <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
                   </linearGradient>
                 </defs>
+                {/* Horizontal Grid Lines */}
                 {[0, 25, 50, 75, 100].map(val => (
-                  <line 
+                  <line
                     key={val}
-                    x1="0" y1={graphHeight - (val/100)*graphHeight} 
-                    x2={graphWidth} y2={graphHeight - (val/100)*graphHeight} 
-                    stroke="#f1f5f9" strokeWidth="1" 
+                    x1="0" y1={graphHeight - (val / 100) * graphHeight}
+                    x2={graphWidth} y2={graphHeight - (val / 100) * graphHeight}
+                    stroke="#f1f5f9" strokeWidth="1"
                   />
                 ))}
-                <path d={areaData} fill="url(#graphGradient)" />
-                <path d={pathData} fill="none" stroke="#4f46e5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                {points.map((p, i) => (
-                  <circle key={i} cx={p.x} cy={p.y} r="6" fill="#4f46e5" className="transition-all duration-300" />
-                ))}
+
+                {/* Graph Lines */}
+                {points.length > 0 && (
+                  <>
+                    <path d={areaData} fill="url(#graphGradient)" />
+                    <path d={pathData} fill="none" stroke="#4f46e5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                    {points.map((p, i) => (
+                      <circle key={i} cx={p.x} cy={p.y} r="6" fill="#4f46e5" className="transition-all duration-300" />
+                    ))}
+                  </>
+                )}
               </svg>
               <div className="flex justify-between mt-6 px-1">
-                {performanceData.map(d => (
-                  <span key={d.day} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{d.day}</span>
+                {weeklyData.map((d, i) => (
+                  <span key={i} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{d.day}</span>
                 ))}
               </div>
             </div>
@@ -158,7 +180,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                 Vault History
               </h2>
               <div className="space-y-3">
-                {readHistory.slice(0, 4).map((item, idx) => (
+                {readHistory.length > 0 ? readHistory.slice(0, 4).map((item, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-3xl border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
                     <img src={item.coverUrl} className="w-10 h-14 rounded-lg object-cover shadow-sm" alt="" />
                     <div className="min-w-0">
@@ -166,7 +188,11 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                       <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{item.category}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="p-8 bg-slate-50 rounded-[2rem] text-center border border-dashed border-slate-200">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No history yet</p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -182,7 +208,7 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
                       <Timer className="w-3 h-3" /> Duration: {nextTask.duration}m
                     </div>
                     <h4 className="text-lg font-bold leading-tight mb-4">{nextTask.title}</h4>
-                    <button 
+                    <button
                       onClick={() => navigate('/planner')}
                       className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
                     >
@@ -203,46 +229,49 @@ const Stats: React.FC<StatsProps> = ({ documents, tasks }) => {
 
         <div className="lg:col-span-4 space-y-8">
           <div className="bg-indigo-600 text-white p-8 rounded-[3rem] shadow-2xl relative overflow-hidden">
-             <div className="relative z-10 space-y-8">
-                <div>
-                   <p className="text-4xl font-black">{sessionStats.minutes}<span className="text-sm font-bold text-indigo-200 ml-1">mins</span></p>
-                   <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mt-1">Study Focus Time</p>
+            <div className="relative z-10 space-y-8">
+              <div>
+                <p className="text-4xl font-black">{totalMinutes}<span className="text-sm font-bold text-indigo-200 ml-1">mins</span></p>
+                <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mt-1">Total Focus Time</p>
+              </div>
+              <div>
+                <p className="text-4xl font-black">{productivityScore}%</p>
+                <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mt-1">Agenda Completion</p>
+              </div>
+              <div className="pt-6 border-t border-white/10">
+                <div className="flex justify-between text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-3">
+                  <span>Daily Mastery Goal</span>
+                  {/* Assuming a 60 min daily goal for the bar calculation */}
+                  <span>{Math.min(100, Math.round((totalMinutes / 60) * 100))}%</span>
                 </div>
-                <div>
-                   <p className="text-4xl font-black">{productivityScore}%</p>
-                   <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mt-1">Agenda Completion</p>
+                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full shadow-[0_0_10px_white]" style={{ width: `${Math.min(100, (totalMinutes / 60) * 100)}%` }}></div>
                 </div>
-                <div className="pt-6 border-t border-white/10">
-                   <div className="flex justify-between text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-3">
-                      <span>Daily Mastery Goal</span>
-                      <span>{Math.round((sessionStats.minutes/120)*100)}%</span>
-                   </div>
-                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-white rounded-full shadow-[0_0_10px_white]" style={{ width: `${Math.min(100, (sessionStats.minutes/120)*100)}%` }}></div>
-                   </div>
-                </div>
-             </div>
-             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+              </div>
+            </div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
           </div>
 
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-             <h3 className="font-black text-slate-900 mb-8 flex items-center gap-2">
-                <Target className="w-5 h-5 text-rose-500" />
-                Knowledge Core
-             </h3>
-             <div className="space-y-6">
-                {subjectSplit.map(s => (
-                  <div key={s.label}>
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-2">
-                      <span className="text-slate-500">{s.label}</span>
-                      <span className="text-slate-900">{s.percent}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
-                       <div className={`${s.color} h-full rounded-full transition-all duration-1000`} style={{ width: `${s.percent}%` }}></div>
-                    </div>
+            <h3 className="font-black text-slate-900 mb-8 flex items-center gap-2">
+              <Target className="w-5 h-5 text-rose-500" />
+              Knowledge Core
+            </h3>
+            <div className="space-y-6">
+              {subjectSplit.length > 0 ? subjectSplit.map(s => (
+                <div key={s.label}>
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-2">
+                    <span className="text-slate-500">{s.label}</span>
+                    <span className="text-slate-900">{s.percent}%</span>
                   </div>
-                ))}
-             </div>
+                  <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
+                    <div className={`${s.color} h-full rounded-full transition-all duration-1000`} style={{ width: `${s.percent}%` }}></div>
+                  </div>
+                </div>
+              )) : (
+                <div className="p-4 text-center text-slate-400 text-xs font-bold">No documents analysed</div>
+              )}
+            </div>
           </div>
         </div>
       </div>
