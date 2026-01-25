@@ -25,10 +25,120 @@ const INITIAL_DOCS: Document[] = [
     id: '1',
     title: 'Introduction to Quantum Physics',
     author: 'Richard Feynman',
-    category: 'Science',
+    category: 'Physics',
     uploadDate: '2024-03-15',
     content: 'Quantum mechanics is a fundamental theory in physics that provides a description of the physical properties of nature at the scale of atoms and subatomic particles.',
     coverUrl: 'https://picsum.photos/seed/physics/300/400'
+  },
+  {
+    id: '2',
+    title: 'CMOS VLSI Design',
+    author: 'Weste & Harris',
+    category: 'Engineering',
+    uploadDate: '2024-01-20',
+    content: 'A Circuits and Systems Perspective',
+    coverUrl: 'https://picsum.photos/seed/cmos/300/400',
+    fileUrl: '/books/CMOS VLSI Design A Circuits and Systems Perspective.pdf'
+  },
+  {
+    id: '3',
+    title: 'Communication Systems (Analog and Digital)',
+    author: 'Dr. Sanjay Sharma',
+    category: 'Engineering',
+    uploadDate: '2024-01-21',
+    content: 'Comprehensive guide to communication systems.',
+    coverUrl: 'https://picsum.photos/seed/comm1/300/400',
+    fileUrl: '/books/Communication system (Analog and Digital) -- Dr.Sanjay Sharma -- ( WeLib.org ).pdf'
+  },
+  {
+    id: '4',
+    title: 'Communication Systems (4th Ed)',
+    author: 'Simon Haykin',
+    category: 'Engineering',
+    uploadDate: '2024-01-22',
+    content: 'Standard text on communication systems with solutions.',
+    coverUrl: 'https://picsum.photos/seed/comm2/300/400',
+    fileUrl: '/books/CommunicationSystems4thEditionSimonHaykinWithSolutionsManual.pdf'
+  },
+  {
+    id: '5',
+    title: 'Electronic Devices and Circuit Theory',
+    author: 'Boylestad',
+    category: 'Engineering',
+    uploadDate: '2024-01-23',
+    content: 'Fundamental concepts of electronic devices.',
+    coverUrl: 'https://picsum.photos/seed/devices1/300/400',
+    fileUrl: '/books/Electronic Devices and Circuit Theory.pdf'
+  },
+  {
+    id: '6',
+    title: 'Electronic Devices',
+    author: 'Millman & Halkias',
+    category: 'Engineering',
+    uploadDate: '2024-01-24',
+    content: 'Classic text on electronic devices.',
+    coverUrl: 'https://picsum.photos/seed/devices2/300/400',
+    fileUrl: '/books/Electronic-Devices-Millman_Halkias.pdf'
+  },
+  {
+    id: '7',
+    title: 'Elements of Electromagnetics',
+    author: 'Sadiku',
+    category: 'Physics',
+    uploadDate: '2024-01-25',
+    content: 'Electromagnetic field theory.',
+    coverUrl: 'https://picsum.photos/seed/elem/300/400',
+    fileUrl: '/books/Elements_of_Electromagnetics_Sadiku.pdf'
+  },
+  {
+    id: '8',
+    title: 'Signal & Systems Textbook',
+    author: 'Unknown',
+    category: 'Engineering',
+    uploadDate: '2024-01-26',
+    content: 'Textbook on signals and systems.',
+    coverUrl: 'https://picsum.photos/seed/signals/300/400',
+    fileUrl: '/books/Final_Signal-System-text-book.pdf'
+  },
+  {
+    id: '9',
+    title: 'Probability & Random Variables',
+    author: 'Papoulis',
+    category: 'Mathematics',
+    uploadDate: '2024-01-27',
+    content: 'Stochastic processes and probability.',
+    coverUrl: 'https://picsum.photos/seed/prob/300/400',
+    fileUrl: '/books/PROBABILITY_RANDOM_VARIABLES_AND_STOCHAS.pdf'
+  },
+  {
+    id: '10',
+    title: 'Introduction to Python',
+    author: 'Daniel Liang',
+    category: 'Computer Science',
+    uploadDate: '2024-01-28',
+    content: 'Introduction to programming using Python.',
+    coverUrl: 'https://picsum.photos/seed/python/300/400',
+    fileUrl: '/books/Python_Daniel_Liang.pdf'
+  },
+  {
+    id: '11',
+    title: 'Fundamentals of Digital Circuits',
+    author: 'Anand Kumar',
+    category: 'Engineering',
+    uploadDate: '2024-01-29',
+    content: 'Digital circuit design fundamentals.',
+    coverUrl: 'https://picsum.photos/seed/digital/300/400',
+    fileUrl: '/books/fundementals-of-digital-circuits(DCD).pdf'
+  },
+  {
+    id: '12',
+    title: 'Signals and Systems',
+    author: 'Ananda Kumar',
+    category: 'Engineering',
+    uploadDate: '2024-01-30',
+    content: 'Comprehensive coverage of signals and systems.',
+    coverUrl: 'https://picsum.photos/seed/signals2/300/400',
+    fileUrl: '/books/signals-and-systems-by-ananda-kumar-pdf-free.pdf'
   }
 ];
 
@@ -70,6 +180,33 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!session) return;
+    const interval = setInterval(async () => {
+      const today = new Date().toISOString().split('T')[0];
+      if (isLocalMode) {
+        const stats = JSON.parse(localStorage.getItem('eduvault_study_stats') || '{}');
+        stats[today] = (stats[today] || 0) + 1;
+        localStorage.setItem('eduvault_study_stats', JSON.stringify(stats));
+      } else {
+        const { data: existing } = await supabase
+          .from('study_sessions')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('date', today)
+          .single();
+
+        if (existing) {
+          await supabase.from('study_sessions').update({ minutes: existing.minutes + 1 }).eq('id', existing.id);
+        } else {
+          await supabase.from('study_sessions').insert([{ user_id: session.user.id, date: today, minutes: 1 }]);
+        }
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [session, isLocalMode]);
+
+  useEffect(() => {
+    if (!session) return;
     if (isLocalMode) {
       const savedDocs = localStorage.getItem('eduvault_docs');
       const savedTasks = localStorage.getItem('eduvault_tasks');
@@ -91,6 +228,26 @@ const App: React.FC = () => {
       if (tasksRes.data) setTasks(tasksRes.data);
       setSyncStatus('synced');
     } catch { setSyncStatus('error'); }
+  };
+
+  const handleDeleteDocument = async (id: string) => {
+    setSyncStatus('syncing');
+    try {
+      if (isLocalMode) {
+        const updated = documents.filter(d => d.id !== id);
+        setDocuments(updated);
+        localStorage.setItem('eduvault_docs', JSON.stringify(updated));
+      } else {
+        const { error } = await supabase.from('documents').delete().eq('id', id);
+        if (error) throw error;
+        setDocuments(prev => prev.filter(d => d.id !== id));
+      }
+      addNotification('success', 'Deleted', 'Document removed from vault.');
+      setSyncStatus('synced');
+    } catch {
+      addNotification('alert', 'Error', 'Failed to delete document.');
+      setSyncStatus('error');
+    }
   };
 
   const handleLogout = async () => {
@@ -142,19 +299,20 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
-              <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={() => { }} />} />
+              <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={handleDeleteDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/stats" element={<Stats documents={documents} tasks={tasks} />} />
               <Route path="/planner" element={<Planner onNotify={addNotification} initialTasks={tasks} />} />
               <Route path="/profile" element={<ProfileView documents={documents} onLogout={handleLogout} />} />
-              <Route path="/admin" element={isAdmin ? <AdminPortal documents={documents} onRemove={() => { }} /> : <Navigate to="/" replace />} />
+              <Route path="/admin" element={isAdmin ? <AdminPortal documents={documents} onRemove={handleDeleteDocument} /> : <Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
+            </Routes >
+          </main >
           <MobileBottomNav searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-        </div>
-      </div>
-    </HashRouter>
+        </div >
+      </div >
+    </HashRouter >
   );
 };
 
