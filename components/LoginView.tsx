@@ -65,7 +65,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
 
   const handleGoogleLogin = async () => {
     if (!isSupabaseConfigured) {
-      setError("Cloud services not connected. Profile saving will be limited.");
+      setError("Supabase setup incomplete. Running in Local Offline Mode.");
       setTimeout(onLogin, 1500);
       return;
     }

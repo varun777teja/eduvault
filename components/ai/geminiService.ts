@@ -3,29 +3,57 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Source, Flashcard, QuizQuestion, MindMapData } from "./types";
 
-const MAX_CONTEXT_CHARS = 28000; 
-// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
-const API_KEY = process.env.API_KEY;
+const MAX_CONTEXT_CHARS = 28000;
+const API_KEYS = (process.env.API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
 
 export class GeminiService {
-  private get ai() {
-    // Create a new GoogleGenAI instance right before making an API call to ensure it always uses the most up-to-date API key.
-    return new GoogleGenAI({ apiKey: API_KEY });
+
+  // Helper to run content generation with key rotation on failure
+  private async generateContent(params: any): Promise<any> {
+    if (API_KEYS.length === 0) {
+      throw new Error("No API Keys found!");
+    }
+
+    let lastError: any = null;
+
+    // Try each key in order until one works
+    for (let i = 0; i < API_KEYS.length; i++) {
+      const key = API_KEYS[i];
+      try {
+        const ai = new GoogleGenAI({ apiKey: key });
+        // Direct call to the model's generateContent
+        const result = await ai.models.generateContent(params);
+        console.log(`Success with API Key index ${i}`);
+        return result;
+      } catch (error: any) {
+        lastError = error;
+        const errorMsg = error?.message?.toLowerCase() || "";
+        const isQuotaError = errorMsg.includes('429') || errorMsg.includes('resource_exhausted') || errorMsg.includes('quota');
+
+        if (isQuotaError) {
+          console.warn(`Key index ${i} exhausted/throttled. Switching to next key...`);
+          continue; // Try next key
+        }
+
+        // If it's a non-quota error (e.g. invalid request), throw immediately
+        throw error;
+      }
+    }
+
+    // If all keys failed
+    throw lastError || new Error("All API keys failed.");
   }
 
-  private async callWithRetry<T>(fn: () => Promise<T>, retries = 4, delay = 2500): Promise<T> {
+  // Wrapped execution for generic retries (network glitches), 
+  // though generateContent handles the quota retries now.
+  private async callWithRetry<T>(fn: () => Promise<T>, retries = 2, delay = 2000): Promise<T> {
     try {
       return await fn();
     } catch (error: any) {
-      const errorMsg = error?.message?.toLowerCase() || "";
-      const isRateLimit = errorMsg.includes('429') || errorMsg.includes('resource_exhausted') || errorMsg.includes('quota');
-      const isOverloaded = errorMsg.includes('503') || errorMsg.includes('overloaded') || errorMsg.includes('deadline');
-      
-      if ((isRateLimit || isOverloaded) && retries > 0) {
-        const jitter = Math.random() * 1000;
-        const nextDelay = delay + jitter;
-        console.warn(`Gemini API Throttled (429/503). Retrying in ${Math.round(nextDelay)}ms... (${retries} attempts left)`);
-        await new Promise(resolve => setTimeout(resolve, nextDelay));
+      // If it gets here, it means all keys failed or it's a non-quota error
+      // We can still retry a bit for transient network issues
+      if (retries > 0) {
+        await new Promise(r => setTimeout(r, delay));
         return this.callWithRetry(fn, retries - 1, delay * 2);
       }
       throw error;
@@ -37,12 +65,12 @@ export class GeminiService {
     for (const s of sources) {
       const header = `SOURCE ID: ${s.id}\nTITLE: ${s.title}\nCONTENT: `;
       const footer = `\n---\n\n`;
-      
+
       const currentLen = context.length + header.length + footer.length;
       if (currentLen >= limit) break;
 
       const availableChars = limit - currentLen;
-      const contentToAppend = s.content.length > availableChars 
+      const contentToAppend = s.content.length > availableChars
         ? s.content.substring(0, availableChars) + "... [TRUNCATED]"
         : s.content;
 
@@ -54,16 +82,14 @@ export class GeminiService {
   async generateTutorQuestion(sources: Source[], pageContext?: string): Promise<string> {
     return this.callWithRetry(async () => {
       const context = pageContext || this.getSourceContext(sources, 5000);
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `Based on this specific document context, generate one thought-provoking, Socratic question to test the reader's deep understanding. Do not ask simple facts; ask for synthesis or application. Context:\n${context}`,
-        config: { 
+        config: {
           systemInstruction: "You are Brahma Tutor. Your goal is to help users master content by asking challenging questions.",
-          temperature: 0.7 
+          temperature: 0.7
         },
       });
-      // response.text directly returns the string output. Do not use response.text()
       return response.text || "What is the most significant takeaway from this section in your opinion?";
     });
   }
@@ -85,9 +111,8 @@ export class GeminiService {
         4. If it's a math/scientific problem, show the derivation.
       `;
 
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma Solver. Provide rigorous, academic, step-by-step solutions to problems.",
@@ -95,7 +120,6 @@ export class GeminiService {
         },
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       return response.text || "I was unable to derive a solution based on the available research.";
     });
   }
@@ -109,30 +133,27 @@ export class GeminiService {
         Focus on synthesis, cross-referencing, and pattern detection.
       `;
 
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `CONTEXT:\n${context}\n\nQUESTION: ${prompt}`,
         config: { systemInstruction, temperature: 0.1 },
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       return {
         text: response.text || "I couldn't generate a response based on the sources.",
-        citations: [] 
+        citations: []
       };
     });
   }
 
   async processYouTubeUrl(url: string): Promise<{ title: string, transcript: string }> {
     return this.callWithRetry(async () => {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `Analyze this YouTube video URL: ${url}. 
         Return ONLY a JSON object with "title" and "transcript" (a detailed summary if transcript is missing).`,
-        config: { 
-          tools: [{ googleSearch: {} }],
+        config: {
+          // tools: [{ googleSearch: {} }], // Disabled temporarily or needs correct tool config
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -145,7 +166,6 @@ export class GeminiService {
         },
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       const parsed = JSON.parse(response.text || '{"title":"Video Source", "transcript":""}');
       return parsed;
     });
@@ -154,9 +174,8 @@ export class GeminiService {
   async generateLearningMaterials(sources: Source[]): Promise<{ flashcards: Flashcard[], quiz: QuizQuestion[] }> {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 1000);
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `Generate 10 high-fidelity flashcards and 5 critical quiz questions from this context:\n${context}. Focus on the most important concepts.`,
         config: {
           responseMimeType: "application/json",
@@ -192,7 +211,6 @@ export class GeminiService {
         }
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       const parsed = JSON.parse(response.text || '{"flashcards":[], "quiz":[]}');
       return parsed;
     });
@@ -201,9 +219,8 @@ export class GeminiService {
   async generateMindMap(sources: Source[]): Promise<MindMapData> {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 1000);
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview', 
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `Create a semantic knowledge graph and roadmap for this research:\n${context}`,
         config: {
           responseMimeType: "application/json",
@@ -255,7 +272,6 @@ export class GeminiService {
         }
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       const parsed = JSON.parse(response.text || '{"nodes":[],"links":[],"roadmap":[]}');
       return parsed;
     });
@@ -264,13 +280,11 @@ export class GeminiService {
   async answerLearningQuestion(question: string, sources: Source[]): Promise<string> {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 2000);
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-flash',
         contents: `CONTEXT:\n${context}\n\nUSER QUESTION: ${question}`,
         config: { temperature: 0.2 },
       });
-      // response.text directly returns the string output. Do not use response.text()
       return response.text || "No relevant data found in library.";
     });
   }
@@ -286,9 +300,8 @@ export class GeminiService {
         ${researchContext}
       `;
 
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma. Solve the exam paper with academic rigor using research context.",
@@ -296,7 +309,6 @@ export class GeminiService {
         },
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       return response.text || "Failed to solve the paper.";
     });
   }
@@ -306,9 +318,8 @@ export class GeminiService {
       const papersContext = this.getSourceContext(questionPapers, MAX_CONTEXT_CHARS - 1000);
       const prompt = `Analyze historical patterns and predict upcoming exam themes:\n${papersContext}`;
 
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        // Simplified contents as per guidelines
+      const response = await this.generateContent({
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma. Predict exam patterns based on historical question data.",
@@ -316,7 +327,6 @@ export class GeminiService {
         },
       });
 
-      // response.text directly returns the string output. Do not use response.text()
       return response.text || "Failed to generate prediction.";
     });
   }
