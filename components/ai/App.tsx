@@ -14,7 +14,37 @@ interface ExternalDoc {
   title: string;
   content: string;
   category?: string;
+  fileUrl?: string;
 }
+
+declare const pdfjsLib: any;
+
+const extractTextFromPdfUrl = async (url: string): Promise<string> => {
+  try {
+    const loadingTask = pdfjsLib.getDocument(url);
+    const pdf = await loadingTask.promise;
+    let fullText = '';
+
+    // Limit to first 20 pages to avoid memory crash on mobile/browser for large books
+    const maxPages = Math.min(pdf.numPages, 20);
+
+    for (let i = 1; i <= maxPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item: any) => item.str).join(' ');
+      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+    }
+
+    if (pdf.numPages > maxPages) {
+      fullText += `\n... [Truncated after ${maxPages} pages for performance] ...`;
+    }
+
+    return fullText;
+  } catch (error) {
+    console.error("Failed to extract PDF text:", error);
+    return "";
+  }
+};
 
 interface AppProps {
   externalDocs?: ExternalDoc[];
@@ -40,14 +70,31 @@ const App: React.FC<AppProps> = ({ externalDocs = [] }) => {
           .filter(d => !existingIds.has(d.id))
           .map(d => ({
             id: d.id,
-            title: d.title, // Fixed: removed .substring(0, 30) to keep full title
+            title: d.title,
             type: 'text' as const,
-            content: d.content || `(No content available for ${d.title})`,
+            content: d.content,
             selected: true,
-            metadata: { category: d.category }
+            metadata: { category: d.category, fileUrl: d.fileUrl, isLoading: !!d.fileUrl }
           }));
 
         if (newSources.length === 0) return prev;
+
+        // Trigger async loading for PDFs
+        newSources.forEach(async (source, index) => {
+          const fileUrl = externalDocs.find(d => d.id === source.id)?.fileUrl;
+          if (fileUrl) {
+            console.log(`Loading PDF content for ${source.title}...`);
+            const pdfText = await extractTextFromPdfUrl(fileUrl);
+            if (pdfText) {
+              setSources(current => current.map(s =>
+                s.id === source.id
+                  ? { ...s, content: pdfText, metadata: { ...s.metadata, isLoading: false } }
+                  : s
+              ));
+            }
+          }
+        });
+
         return [...prev, ...newSources];
       });
     }
