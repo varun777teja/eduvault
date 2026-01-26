@@ -22,7 +22,7 @@ const MobileBottomNav: React.FC<{ searchTerm: string, onSearchChange: (v: string
 
   return (
     <>
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[110] px-4 pb-4 pointer-events-none ${location.pathname === '/ai-future' ? 'hidden' : ''}`}>
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[110] px-4 pb-4 pointer-events-none ${location.pathname.includes('ai-future') ? 'hidden' : ''}`}>
         <div className="max-w-md mx-auto h-16 bg-white/95 backdrop-blur-3xl border border-slate-200/50 rounded-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] flex items-center justify-between px-2 pointer-events-auto relative">
 
           {/* Home */}
