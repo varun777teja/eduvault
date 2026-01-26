@@ -83,7 +83,7 @@ export class GeminiService {
     return this.callWithRetry(async () => {
       const context = pageContext || this.getSourceContext(sources, 5000);
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `Based on this specific document context, generate one thought-provoking, Socratic question to test the reader's deep understanding. Do not ask simple facts; ask for synthesis or application. Context:\n${context}`,
         config: {
           systemInstruction: "You are Brahma Tutor. Your goal is to help users master content by asking challenging questions.",
@@ -112,7 +112,7 @@ export class GeminiService {
       `;
 
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma Solver. Provide rigorous, academic, step-by-step solutions to problems.",
@@ -134,7 +134,7 @@ export class GeminiService {
       `;
 
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `CONTEXT:\n${context}\n\nQUESTION: ${prompt}`,
         config: { systemInstruction, temperature: 0.1 },
       });
@@ -149,7 +149,7 @@ export class GeminiService {
   async processYouTubeUrl(url: string): Promise<{ title: string, transcript: string }> {
     return this.callWithRetry(async () => {
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `Analyze this YouTube video URL: ${url}. 
         Return ONLY a JSON object with "title" and "transcript" (a detailed summary if transcript is missing).`,
         config: {
@@ -175,7 +175,7 @@ export class GeminiService {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 1000);
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `Generate 10 high-fidelity flashcards and 5 critical quiz questions from this context:\n${context}. Focus on the most important concepts.`,
         config: {
           responseMimeType: "application/json",
@@ -220,7 +220,7 @@ export class GeminiService {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 1000);
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `Create a semantic knowledge graph and roadmap for this research:\n${context}`,
         config: {
           responseMimeType: "application/json",
@@ -281,7 +281,7 @@ export class GeminiService {
     return this.callWithRetry(async () => {
       const context = this.getSourceContext(sources, MAX_CONTEXT_CHARS - 2000);
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `CONTEXT:\n${context}\n\nUSER QUESTION: ${question}`,
         config: { temperature: 0.2 },
       });
@@ -301,7 +301,7 @@ export class GeminiService {
       `;
 
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma. Solve the exam paper with academic rigor using research context.",
@@ -319,7 +319,7 @@ export class GeminiService {
       const prompt = `Analyze historical patterns and predict upcoming exam themes:\n${papersContext}`;
 
       const response = await this.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
           systemInstruction: "You are Brahma. Predict exam patterns based on historical question data.",
