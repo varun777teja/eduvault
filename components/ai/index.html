@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Brahma - Intelligence Engine</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.ibb.co/6JbSBhjt/logobrahma.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/6JbSBhjt/logobrahma.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        :root {
+            --sat: env(safe-area-inset-top);
+            --sar: env(safe-area-inset-right);
+            --sab: env(safe-area-inset-bottom);
+            --sal: env(safe-area-inset-left);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .source-card:hover .source-actions { opacity: 1; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+        
+        .pdf-loading-overlay {
+            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { transform: scale(1); opacity: 0.5; filter: blur(20px); }
+          50% { transform: scale(1.2); opacity: 0.8; filter: blur(40px); }
+        }
+
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        @keyframes neural-ripple {
+          0% { transform: scale(0.8); opacity: 0; }
+          50% { opacity: 0.3; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        @keyframes speaking-pulse {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.1); filter: brightness(1.4); }
+        }
+
+        .animate-pulse-glow { animation: pulse-glow 3s infinite ease-in-out; }
+        .animate-spin-slow { animation: spin-slow 8s infinite linear; }
+        .animate-float { animation: float 4s infinite ease-in-out; }
+        .animate-neural-ripple { animation: neural-ripple 2s infinite ease-out; }
+        .animate-speaking-pulse { animation: speaking-pulse 1.5s infinite ease-in-out; }
+
+        .safe-area-pt { padding-top: var(--sat); }
+        .safe-area-pb { padding-bottom: var(--sab); }
+        
+        .mobile-scroller {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            touch-action: pan-y;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.3/client",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-white">
+    <div id="root"></div>
+    <script>
+      // Configure PDF.js Worker
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+    </script>
+    <!-- Entry point for the application -->
+    <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

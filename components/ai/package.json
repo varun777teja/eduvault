@@ -1,5 +1,5 @@
 {
-  "name": "eduvault:-smart-e-library",
+  "name": "brahma---clone",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,13 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.38.0",
-    "@supabase/supabase-js": "2.48.1",
-    "lucide-react": "0.462.0",
-    "pdfjs-dist": "^5.4.530",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-router-dom": "7.1.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "@google/genai": "^1.37.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -9,6 +9,7 @@ import {
 import { Document } from '../types';
 import { INTERNSHIPS, COURSES, AI_TOOLS } from '../constants/resources';
 import PdfThumbnail from './PdfThumbnail';
+import BrahmaAI from './ai/App';
 
 interface DashboardProps {
   documents: Document[];
@@ -91,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, initialTab = 'internsh
             onClick={() => setActiveTab('ai')}
             className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${activeTab === 'ai' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
           >
-            <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="AI" className="w-5 h-5 object-contain" /> AI Tools
+            <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="AI" className="w-5 h-5 object-contain" /> AI Future
           </button>
         </div>
 
@@ -153,24 +154,11 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, initialTab = 'internsh
             </div>
           )}
 
-          {activeTab === 'ai' && AI_TOOLS.map((item) => (
-            <a href={item.link} target="_blank" rel="noopener noreferrer" key={item.id} className="group p-6 bg-white border border-slate-100 rounded-[2rem] hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col hover:-translate-y-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden p-2">
-                  <img src="https://i.ibb.co/s9RWGZ5Q/Gemini-Generated-Image-laanrxlaanrxlaan-removebg-preview.png" alt="AI" className="w-full h-full object-contain" />
-                </div>
-                <span className="px-3 py-1 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:bg-purple-600 group-hover:text-white transition-colors">{item.purpose}</span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors mb-1">{item.name}</h3>
-              <p className="text-xs font-medium text-slate-500 italic">{item.tip}</p>
-              <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50 gap-2">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Try Tool</span>
-                <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </div>
-              </div>
-            </a>
-          ))}
+          {activeTab === 'ai' && (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 h-[800px] border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-2xl bg-white">
+              <BrahmaAI externalDocs={documents} />
+            </div>
+          )}
         </div>
       </div>
     </div>

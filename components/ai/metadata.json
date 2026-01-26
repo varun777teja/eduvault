@@ -1,0 +1,7 @@
+{
+  "name": "Brahma - Clone",
+  "description": "A high-fidelity NotebookLM clone with source-grounded RAG, multi-speaker podcast generation, semantic mind-mapping, and interactive learning tools.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
