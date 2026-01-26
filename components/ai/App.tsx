@@ -155,7 +155,7 @@ const App: React.FC<AppProps> = ({ externalDocs = [] }) => {
       // Increase debounce to 3 seconds to avoid spamming the API while toggling sources
       const timeoutId = setTimeout(() => {
         refreshInsights();
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timeoutId);
     } else {
       setLearningData(null);
