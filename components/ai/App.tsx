@@ -19,6 +19,15 @@ interface ExternalDoc {
 
 declare const pdfjsLib: any;
 
+// Configure PDF.js worker to use the CDN version matching the main library
+try {
+  if (typeof window !== 'undefined' && window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+} catch (e) {
+  console.warn("PDF.js worker setup failed", e);
+}
+
 const extractTextFromPdfUrl = async (url: string): Promise<string> => {
   try {
     const loadingTask = pdfjsLib.getDocument(url);
