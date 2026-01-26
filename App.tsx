@@ -15,6 +15,7 @@ import ProfileView from './components/ProfileView.tsx';
 import LoginView from './components/LoginView.tsx';
 import NotificationSystem from './components/NotificationSystem.tsx';
 import AdminPortal from './components/AdminPortal.tsx';
+import BrahmaAI from './components/ai/App.tsx';
 
 import { Document, AppNotification, Task } from './types.ts';
 import { soundService } from './services/soundService.ts';
@@ -318,7 +319,7 @@ const App: React.FC = () => {
           <main className="flex-1 overflow-y-auto custom-scrollbar">
             <Routes>
               <Route path="/" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} /></div>} />
-              <Route path="/ai-future" element={<div className="p-6 lg:p-10"><Dashboard documents={documents} initialTab="ai" /></div>} />
+              <Route path="/ai-future" element={<div className="h-full"><BrahmaAI externalDocs={documents} /></div>} />
               <Route path="/search" element={<SearchView documents={documents} searchTerm={searchTerm} onSearchChange={setSearchTerm} />} />
               <Route path="/library" element={<LibraryViewComponent documents={documents} onRemove={handleDeleteDocument} />} />
               <Route path="/reader/:id" element={<Reader documents={documents} />} />
